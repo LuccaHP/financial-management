@@ -4,8 +4,8 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from '@tanstack/react-query'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Pencil, Plus, Repeat, Search, Trash2 } from 'lucide-react'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Download, Pencil, Plus, Repeat, Search, Trash2, Upload } from 'lucide-react'
 import { useState } from 'react'
 import { z } from 'zod'
 import { CategoryIcon } from '#/components/category-icon'
@@ -17,6 +17,7 @@ import { Card } from '#/components/ui/card'
 import { Dialog } from '#/components/ui/dialog'
 import { FieldError, Input, Label } from '#/components/ui/input'
 import { Select } from '#/components/ui/select'
+import { exportCsvFn } from '#/functions/csv.fn'
 import {
   createTransactionFn,
   deleteTransactionFn,
@@ -107,15 +108,47 @@ function TransacoesPage() {
         title="Transações"
         subtitle="Despesas, receitas e transferências"
         actions={
-          <Button
-            onClick={() => {
-              setEditing(null)
-              setFormOpen(true)
-            }}
-          >
-            <Plus className="size-4" strokeWidth={2.5} />
-            Nova transação
-          </Button>
+          <>
+            <Button
+              variant="secondary"
+              onClick={async () => {
+                const { csv, count } = await exportCsvFn({
+                  data: { month: filters.month },
+                })
+                if (count === 0) {
+                  alert('Nenhuma transação neste mês para exportar.')
+                  return
+                }
+                const blob = new Blob([csv], {
+                  type: 'text/csv;charset=utf-8',
+                })
+                const url = URL.createObjectURL(blob)
+                const anchor = document.createElement('a')
+                anchor.href = url
+                anchor.download = `deyno-${filters.month}.csv`
+                anchor.click()
+                URL.revokeObjectURL(url)
+              }}
+            >
+              <Download className="size-4" strokeWidth={2.5} />
+              Exportar CSV
+            </Button>
+            <Link to="/transacoes/importar">
+              <Button variant="secondary">
+                <Upload className="size-4" strokeWidth={2.5} />
+                Importar CSV
+              </Button>
+            </Link>
+            <Button
+              onClick={() => {
+                setEditing(null)
+                setFormOpen(true)
+              }}
+            >
+              <Plus className="size-4" strokeWidth={2.5} />
+              Nova transação
+            </Button>
+          </>
         }
       />
 

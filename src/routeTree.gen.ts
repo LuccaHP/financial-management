@@ -21,6 +21,7 @@ import { Route as AppTransacoesIndexRouteImport } from './routes/_app/transacoes
 import { Route as AppObjetivosIndexRouteImport } from './routes/_app/objetivos/index'
 import { Route as AppCartoesIndexRouteImport } from './routes/_app/cartoes/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AppTransacoesImportarRouteImport } from './routes/_app/transacoes/importar'
 import { Route as AppObjetivosGoalIdRouteImport } from './routes/_app/objetivos/$goalId'
 import { Route as AppCartoesCardIdRouteImport } from './routes/_app/cartoes/$cardId'
 
@@ -83,6 +84,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppTransacoesImportarRoute = AppTransacoesImportarRouteImport.update({
+  id: '/transacoes/importar',
+  path: '/transacoes/importar',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppObjetivosGoalIdRoute = AppObjetivosGoalIdRouteImport.update({
   id: '/objetivos/$goalId',
   path: '/objetivos/$goalId',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/recorrentes': typeof AppRecorrentesRoute
   '/cartoes/$cardId': typeof AppCartoesCardIdRoute
   '/objetivos/$goalId': typeof AppObjetivosGoalIdRoute
+  '/transacoes/importar': typeof AppTransacoesImportarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/cartoes/': typeof AppCartoesIndexRoute
   '/objetivos/': typeof AppObjetivosIndexRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/cartoes/$cardId': typeof AppCartoesCardIdRoute
   '/objetivos/$goalId': typeof AppObjetivosGoalIdRoute
+  '/transacoes/importar': typeof AppTransacoesImportarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/cartoes': typeof AppCartoesIndexRoute
   '/objetivos': typeof AppObjetivosIndexRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/_app/cartoes/$cardId': typeof AppCartoesCardIdRoute
   '/_app/objetivos/$goalId': typeof AppObjetivosGoalIdRoute
+  '/_app/transacoes/importar': typeof AppTransacoesImportarRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_app/cartoes/': typeof AppCartoesIndexRoute
   '/_app/objetivos/': typeof AppObjetivosIndexRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/recorrentes'
     | '/cartoes/$cardId'
     | '/objetivos/$goalId'
+    | '/transacoes/importar'
     | '/api/auth/$'
     | '/cartoes/'
     | '/objetivos/'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cartoes/$cardId'
     | '/objetivos/$goalId'
+    | '/transacoes/importar'
     | '/api/auth/$'
     | '/cartoes'
     | '/objetivos'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/_app/cartoes/$cardId'
     | '/_app/objetivos/$goalId'
+    | '/_app/transacoes/importar'
     | '/api/auth/$'
     | '/_app/cartoes/'
     | '/_app/objetivos/'
@@ -283,6 +295,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/transacoes/importar': {
+      id: '/_app/transacoes/importar'
+      path: '/transacoes/importar'
+      fullPath: '/transacoes/importar'
+      preLoaderRoute: typeof AppTransacoesImportarRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/objetivos/$goalId': {
       id: '/_app/objetivos/$goalId'
       path: '/objetivos/$goalId'
@@ -308,6 +327,7 @@ interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppCartoesCardIdRoute: typeof AppCartoesCardIdRoute
   AppObjetivosGoalIdRoute: typeof AppObjetivosGoalIdRoute
+  AppTransacoesImportarRoute: typeof AppTransacoesImportarRoute
   AppCartoesIndexRoute: typeof AppCartoesIndexRoute
   AppObjetivosIndexRoute: typeof AppObjetivosIndexRoute
   AppTransacoesIndexRoute: typeof AppTransacoesIndexRoute
@@ -321,6 +341,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppCartoesCardIdRoute: AppCartoesCardIdRoute,
   AppObjetivosGoalIdRoute: AppObjetivosGoalIdRoute,
+  AppTransacoesImportarRoute: AppTransacoesImportarRoute,
   AppCartoesIndexRoute: AppCartoesIndexRoute,
   AppObjetivosIndexRoute: AppObjetivosIndexRoute,
   AppTransacoesIndexRoute: AppTransacoesIndexRoute,
