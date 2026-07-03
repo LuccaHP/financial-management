@@ -16,6 +16,7 @@ import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppRecorrentesRouteImport } from './routes/_app/recorrentes'
 import { Route as AppOrcamentosRouteImport } from './routes/_app/orcamentos'
 import { Route as AppContasRouteImport } from './routes/_app/contas'
+import { Route as AppConfiguracoesRouteImport } from './routes/_app/configuracoes'
 import { Route as AppCategoriasRouteImport } from './routes/_app/categorias'
 import { Route as AppTransacoesIndexRouteImport } from './routes/_app/transacoes/index'
 import { Route as AppObjetivosIndexRouteImport } from './routes/_app/objetivos/index'
@@ -24,6 +25,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AppTransacoesImportarRouteImport } from './routes/_app/transacoes/importar'
 import { Route as AppObjetivosGoalIdRouteImport } from './routes/_app/objetivos/$goalId'
 import { Route as AppCartoesCardIdRouteImport } from './routes/_app/cartoes/$cardId'
+import { Route as AppAdminUsuariosRouteImport } from './routes/_app/admin/usuarios'
 
 const RegistrarRoute = RegistrarRouteImport.update({
   id: '/registrar',
@@ -57,6 +59,11 @@ const AppOrcamentosRoute = AppOrcamentosRouteImport.update({
 const AppContasRoute = AppContasRouteImport.update({
   id: '/contas',
   path: '/contas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCategoriasRoute = AppCategoriasRouteImport.update({
@@ -99,15 +106,22 @@ const AppCartoesCardIdRoute = AppCartoesCardIdRouteImport.update({
   path: '/cartoes/$cardId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminUsuariosRoute = AppAdminUsuariosRouteImport.update({
+  id: '/admin/usuarios',
+  path: '/admin/usuarios',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/registrar': typeof RegistrarRoute
   '/categorias': typeof AppCategoriasRoute
+  '/configuracoes': typeof AppConfiguracoesRoute
   '/contas': typeof AppContasRoute
   '/orcamentos': typeof AppOrcamentosRoute
   '/recorrentes': typeof AppRecorrentesRoute
+  '/admin/usuarios': typeof AppAdminUsuariosRoute
   '/cartoes/$cardId': typeof AppCartoesCardIdRoute
   '/objetivos/$goalId': typeof AppObjetivosGoalIdRoute
   '/transacoes/importar': typeof AppTransacoesImportarRoute
@@ -120,10 +134,12 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/registrar': typeof RegistrarRoute
   '/categorias': typeof AppCategoriasRoute
+  '/configuracoes': typeof AppConfiguracoesRoute
   '/contas': typeof AppContasRoute
   '/orcamentos': typeof AppOrcamentosRoute
   '/recorrentes': typeof AppRecorrentesRoute
   '/': typeof AppIndexRoute
+  '/admin/usuarios': typeof AppAdminUsuariosRoute
   '/cartoes/$cardId': typeof AppCartoesCardIdRoute
   '/objetivos/$goalId': typeof AppObjetivosGoalIdRoute
   '/transacoes/importar': typeof AppTransacoesImportarRoute
@@ -138,10 +154,12 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/registrar': typeof RegistrarRoute
   '/_app/categorias': typeof AppCategoriasRoute
+  '/_app/configuracoes': typeof AppConfiguracoesRoute
   '/_app/contas': typeof AppContasRoute
   '/_app/orcamentos': typeof AppOrcamentosRoute
   '/_app/recorrentes': typeof AppRecorrentesRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/admin/usuarios': typeof AppAdminUsuariosRoute
   '/_app/cartoes/$cardId': typeof AppCartoesCardIdRoute
   '/_app/objetivos/$goalId': typeof AppObjetivosGoalIdRoute
   '/_app/transacoes/importar': typeof AppTransacoesImportarRoute
@@ -157,9 +175,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/registrar'
     | '/categorias'
+    | '/configuracoes'
     | '/contas'
     | '/orcamentos'
     | '/recorrentes'
+    | '/admin/usuarios'
     | '/cartoes/$cardId'
     | '/objetivos/$goalId'
     | '/transacoes/importar'
@@ -172,10 +192,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/registrar'
     | '/categorias'
+    | '/configuracoes'
     | '/contas'
     | '/orcamentos'
     | '/recorrentes'
     | '/'
+    | '/admin/usuarios'
     | '/cartoes/$cardId'
     | '/objetivos/$goalId'
     | '/transacoes/importar'
@@ -189,10 +211,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/registrar'
     | '/_app/categorias'
+    | '/_app/configuracoes'
     | '/_app/contas'
     | '/_app/orcamentos'
     | '/_app/recorrentes'
     | '/_app/'
+    | '/_app/admin/usuarios'
     | '/_app/cartoes/$cardId'
     | '/_app/objetivos/$goalId'
     | '/_app/transacoes/importar'
@@ -260,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppContasRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/configuracoes': {
+      id: '/_app/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof AppConfiguracoesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/categorias': {
       id: '/_app/categorias'
       path: '/categorias'
@@ -316,15 +347,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCartoesCardIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin/usuarios': {
+      id: '/_app/admin/usuarios'
+      path: '/admin/usuarios'
+      fullPath: '/admin/usuarios'
+      preLoaderRoute: typeof AppAdminUsuariosRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
   AppCategoriasRoute: typeof AppCategoriasRoute
+  AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppContasRoute: typeof AppContasRoute
   AppOrcamentosRoute: typeof AppOrcamentosRoute
   AppRecorrentesRoute: typeof AppRecorrentesRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppAdminUsuariosRoute: typeof AppAdminUsuariosRoute
   AppCartoesCardIdRoute: typeof AppCartoesCardIdRoute
   AppObjetivosGoalIdRoute: typeof AppObjetivosGoalIdRoute
   AppTransacoesImportarRoute: typeof AppTransacoesImportarRoute
@@ -335,10 +375,12 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppCategoriasRoute: AppCategoriasRoute,
+  AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppContasRoute: AppContasRoute,
   AppOrcamentosRoute: AppOrcamentosRoute,
   AppRecorrentesRoute: AppRecorrentesRoute,
   AppIndexRoute: AppIndexRoute,
+  AppAdminUsuariosRoute: AppAdminUsuariosRoute,
   AppCartoesCardIdRoute: AppCartoesCardIdRoute,
   AppObjetivosGoalIdRoute: AppObjetivosGoalIdRoute,
   AppTransacoesImportarRoute: AppTransacoesImportarRoute,
