@@ -21,6 +21,7 @@ import {
   Gauge,
 } from 'lucide-react'
 import { getSessionFn } from '#/functions/auth.fn'
+import { ensureRecurringMaterializedFn } from '#/functions/recurring.fn'
 import { authClient } from '#/lib/auth-client'
 import { ThemeToggle } from '#/components/theme-toggle'
 import { cn } from '#/lib/cn'
@@ -30,6 +31,8 @@ export const Route = createFileRoute('/_app')({
   beforeLoad: async () => {
     const user = await getSessionFn()
     if (!user) throw redirect({ to: '/login' })
+    // lança as recorrências pendentes antes de qualquer loader ler transações
+    await ensureRecurringMaterializedFn()
     return { user }
   },
   component: AppLayout,
