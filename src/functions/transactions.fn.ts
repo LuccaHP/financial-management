@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { db } from '#/db'
 import { accounts, categories, invoicePayments, transactions } from '#/db/schema'
 import { daysInMonth } from '#/lib/dates'
-import { ensureSession } from './auth.fn'
+import { ensureSession } from '#/lib/session.server'
 
 export type TransactionRow = {
   id: string

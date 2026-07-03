@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: deyno_db_prod
+    environment:
+      POSTGRES_DB: deyno
+      POSTGRES_USER: deyno
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # sem porta no host: acesso só pela rede interna do compose
+    # descomente para debug (5433/5434/5435 já estão ocupadas no servidor):
+    # ports:
+    #   - '5436:5432'
+    volumes:
+      - deyno-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U deyno -d deyno']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: deyno_app
+    ports:
+      # 3000/3001/3333/8080/9999 ocupadas no host → 3002
+      - '3002:3000'
+    environment:
+      DATABASE_URL: postgres://deyno:${POSTGRES_PASSWORD}@db:5432/deyno
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${PUBLIC_URL}
+      PUBLIC_URL: ${PUBLIC_URL}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared_deyno
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  deyno-pgdata:

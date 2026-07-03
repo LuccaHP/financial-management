@@ -20,7 +20,7 @@ import {
   invoiceStatus,
 } from '#/lib/invoice'
 import { splitInstallments } from '#/lib/money'
-import { ensureSession } from './auth.fn'
+import { ensureSession } from '#/lib/session.server'
 import type { InvoiceStatus } from '#/lib/invoice'
 
 export type CardRow = {

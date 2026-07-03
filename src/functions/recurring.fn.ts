@@ -5,7 +5,7 @@ import { db } from '#/db'
 import { accounts, categories, recurringRules, transactions } from '#/db/schema'
 import { addMonths, currentMonthKey } from '#/lib/dates'
 import { pendingOccurrences } from '#/lib/recurring'
-import { ensureSession } from './auth.fn'
+import { ensureSession } from '#/lib/session.server'
 
 /**
  * Materializa as ocorrências pendentes das regras ativas do usuário.

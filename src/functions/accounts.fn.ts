@@ -3,7 +3,7 @@ import { and, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { db } from '#/db'
 import { accounts, transactions } from '#/db/schema'
-import { ensureSession } from './auth.fn'
+import { ensureSession } from '#/lib/session.server'
 
 export type AccountWithBalance = {
   id: string

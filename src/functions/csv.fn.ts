@@ -5,7 +5,7 @@ import { db } from '#/db'
 import { accounts, categories, transactions } from '#/db/schema'
 import { serializeTransactionsCsv } from '#/lib/csv'
 import { daysInMonth } from '#/lib/dates'
-import { ensureSession } from './auth.fn'
+import { ensureSession } from '#/lib/session.server'
 
 /** Exporta as transações do mês (ou todas) como CSV. */
 export const exportCsvFn = createServerFn()

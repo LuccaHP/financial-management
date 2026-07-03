@@ -14,7 +14,7 @@ import {
   transactions,
 } from '#/db/schema'
 import { addMonths, daysInMonth } from '#/lib/dates'
-import { ensureSession } from './auth.fn'
+import { ensureSession } from '#/lib/session.server'
 
 export type DashboardData = {
   month: string

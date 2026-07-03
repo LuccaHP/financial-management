@@ -5,7 +5,7 @@ import { db } from '#/db'
 import { goalContributions, goals } from '#/db/schema'
 import { todayKey } from '#/lib/dates'
 import { goalProjection } from '#/lib/goals'
-import { ensureSession } from './auth.fn'
+import { ensureSession } from '#/lib/session.server'
 import type { GoalProjection } from '#/lib/goals'
 
 export type GoalRow = {

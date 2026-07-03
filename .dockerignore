@@ -1,0 +1,13 @@
+node_modules
+.output
+.nitro
+.tanstack
+.git
+.env
+.env.local
+*.local
+.vscode
+.agents
+docker-compose*.yml
+Dockerfile
+README.md

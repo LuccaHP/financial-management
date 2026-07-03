@@ -5,7 +5,7 @@ import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { db } from '#/db'
 import { invites, user } from '#/db/schema'
-import { ensureAdmin } from './auth.fn'
+import { ensureAdmin } from '#/lib/session.server'
 
 export const listUsersFn = createServerFn().handler(async () => {
   await ensureAdmin()

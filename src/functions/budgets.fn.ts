@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { db } from '#/db'
 import { budgets, categories, transactions } from '#/db/schema'
 import { daysInMonth } from '#/lib/dates'
-import { ensureSession } from './auth.fn'
+import { ensureSession } from '#/lib/session.server'
 
 export type BudgetRow = {
   budgetId: string | null

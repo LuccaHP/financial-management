@@ -3,7 +3,7 @@ import { and, asc, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { db } from '#/db'
 import { categories, transactions } from '#/db/schema'
-import { ensureSession } from './auth.fn'
+import { ensureSession } from '#/lib/session.server'
 
 export const listCategoriesFn = createServerFn().handler(async () => {
   const session = await ensureSession()
