@@ -17,7 +17,9 @@ import { Route as AppRecorrentesRouteImport } from './routes/_app/recorrentes'
 import { Route as AppContasRouteImport } from './routes/_app/contas'
 import { Route as AppCategoriasRouteImport } from './routes/_app/categorias'
 import { Route as AppTransacoesIndexRouteImport } from './routes/_app/transacoes/index'
+import { Route as AppCartoesIndexRouteImport } from './routes/_app/cartoes/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AppCartoesCardIdRouteImport } from './routes/_app/cartoes/$cardId'
 
 const RegistrarRoute = RegistrarRouteImport.update({
   id: '/registrar',
@@ -58,10 +60,20 @@ const AppTransacoesIndexRoute = AppTransacoesIndexRouteImport.update({
   path: '/transacoes/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCartoesIndexRoute = AppCartoesIndexRouteImport.update({
+  id: '/cartoes/',
+  path: '/cartoes/',
+  getParentRoute: () => AppRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppCartoesCardIdRoute = AppCartoesCardIdRouteImport.update({
+  id: '/cartoes/$cardId',
+  path: '/cartoes/$cardId',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -71,7 +83,9 @@ export interface FileRoutesByFullPath {
   '/categorias': typeof AppCategoriasRoute
   '/contas': typeof AppContasRoute
   '/recorrentes': typeof AppRecorrentesRoute
+  '/cartoes/$cardId': typeof AppCartoesCardIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/cartoes/': typeof AppCartoesIndexRoute
   '/transacoes/': typeof AppTransacoesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -81,7 +95,9 @@ export interface FileRoutesByTo {
   '/contas': typeof AppContasRoute
   '/recorrentes': typeof AppRecorrentesRoute
   '/': typeof AppIndexRoute
+  '/cartoes/$cardId': typeof AppCartoesCardIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/cartoes': typeof AppCartoesIndexRoute
   '/transacoes': typeof AppTransacoesIndexRoute
 }
 export interface FileRoutesById {
@@ -93,7 +109,9 @@ export interface FileRoutesById {
   '/_app/contas': typeof AppContasRoute
   '/_app/recorrentes': typeof AppRecorrentesRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/cartoes/$cardId': typeof AppCartoesCardIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_app/cartoes/': typeof AppCartoesIndexRoute
   '/_app/transacoes/': typeof AppTransacoesIndexRoute
 }
 export interface FileRouteTypes {
@@ -105,7 +123,9 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/contas'
     | '/recorrentes'
+    | '/cartoes/$cardId'
     | '/api/auth/$'
+    | '/cartoes/'
     | '/transacoes/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -115,7 +135,9 @@ export interface FileRouteTypes {
     | '/contas'
     | '/recorrentes'
     | '/'
+    | '/cartoes/$cardId'
     | '/api/auth/$'
+    | '/cartoes'
     | '/transacoes'
   id:
     | '__root__'
@@ -126,7 +148,9 @@ export interface FileRouteTypes {
     | '/_app/contas'
     | '/_app/recorrentes'
     | '/_app/'
+    | '/_app/cartoes/$cardId'
     | '/api/auth/$'
+    | '/_app/cartoes/'
     | '/_app/transacoes/'
   fileRoutesById: FileRoutesById
 }
@@ -195,12 +219,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTransacoesIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/cartoes/': {
+      id: '/_app/cartoes/'
+      path: '/cartoes'
+      fullPath: '/cartoes/'
+      preLoaderRoute: typeof AppCartoesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/cartoes/$cardId': {
+      id: '/_app/cartoes/$cardId'
+      path: '/cartoes/$cardId'
+      fullPath: '/cartoes/$cardId'
+      preLoaderRoute: typeof AppCartoesCardIdRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
@@ -210,6 +248,8 @@ interface AppRouteChildren {
   AppContasRoute: typeof AppContasRoute
   AppRecorrentesRoute: typeof AppRecorrentesRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppCartoesCardIdRoute: typeof AppCartoesCardIdRoute
+  AppCartoesIndexRoute: typeof AppCartoesIndexRoute
   AppTransacoesIndexRoute: typeof AppTransacoesIndexRoute
 }
 
@@ -218,6 +258,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppContasRoute: AppContasRoute,
   AppRecorrentesRoute: AppRecorrentesRoute,
   AppIndexRoute: AppIndexRoute,
+  AppCartoesCardIdRoute: AppCartoesCardIdRoute,
+  AppCartoesIndexRoute: AppCartoesIndexRoute,
   AppTransacoesIndexRoute: AppTransacoesIndexRoute,
 }
 
