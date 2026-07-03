@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppRecorrentesRouteImport } from './routes/_app/recorrentes'
+import { Route as AppOrcamentosRouteImport } from './routes/_app/orcamentos'
 import { Route as AppContasRouteImport } from './routes/_app/contas'
 import { Route as AppCategoriasRouteImport } from './routes/_app/categorias'
 import { Route as AppTransacoesIndexRouteImport } from './routes/_app/transacoes/index'
@@ -43,6 +44,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppRecorrentesRoute = AppRecorrentesRouteImport.update({
   id: '/recorrentes',
   path: '/recorrentes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOrcamentosRoute = AppOrcamentosRouteImport.update({
+  id: '/orcamentos',
+  path: '/orcamentos',
   getParentRoute: () => AppRoute,
 } as any)
 const AppContasRoute = AppContasRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/registrar': typeof RegistrarRoute
   '/categorias': typeof AppCategoriasRoute
   '/contas': typeof AppContasRoute
+  '/orcamentos': typeof AppOrcamentosRoute
   '/recorrentes': typeof AppRecorrentesRoute
   '/cartoes/$cardId': typeof AppCartoesCardIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/registrar': typeof RegistrarRoute
   '/categorias': typeof AppCategoriasRoute
   '/contas': typeof AppContasRoute
+  '/orcamentos': typeof AppOrcamentosRoute
   '/recorrentes': typeof AppRecorrentesRoute
   '/': typeof AppIndexRoute
   '/cartoes/$cardId': typeof AppCartoesCardIdRoute
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/registrar': typeof RegistrarRoute
   '/_app/categorias': typeof AppCategoriasRoute
   '/_app/contas': typeof AppContasRoute
+  '/_app/orcamentos': typeof AppOrcamentosRoute
   '/_app/recorrentes': typeof AppRecorrentesRoute
   '/_app/': typeof AppIndexRoute
   '/_app/cartoes/$cardId': typeof AppCartoesCardIdRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/registrar'
     | '/categorias'
     | '/contas'
+    | '/orcamentos'
     | '/recorrentes'
     | '/cartoes/$cardId'
     | '/api/auth/$'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/registrar'
     | '/categorias'
     | '/contas'
+    | '/orcamentos'
     | '/recorrentes'
     | '/'
     | '/cartoes/$cardId'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/registrar'
     | '/_app/categorias'
     | '/_app/contas'
+    | '/_app/orcamentos'
     | '/_app/recorrentes'
     | '/_app/'
     | '/_app/cartoes/$cardId'
@@ -198,6 +210,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRecorrentesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/orcamentos': {
+      id: '/_app/orcamentos'
+      path: '/orcamentos'
+      fullPath: '/orcamentos'
+      preLoaderRoute: typeof AppOrcamentosRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/contas': {
       id: '/_app/contas'
       path: '/contas'
@@ -246,6 +265,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppCategoriasRoute: typeof AppCategoriasRoute
   AppContasRoute: typeof AppContasRoute
+  AppOrcamentosRoute: typeof AppOrcamentosRoute
   AppRecorrentesRoute: typeof AppRecorrentesRoute
   AppIndexRoute: typeof AppIndexRoute
   AppCartoesCardIdRoute: typeof AppCartoesCardIdRoute
@@ -256,6 +276,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppCategoriasRoute: AppCategoriasRoute,
   AppContasRoute: AppContasRoute,
+  AppOrcamentosRoute: AppOrcamentosRoute,
   AppRecorrentesRoute: AppRecorrentesRoute,
   AppIndexRoute: AppIndexRoute,
   AppCartoesCardIdRoute: AppCartoesCardIdRoute,
