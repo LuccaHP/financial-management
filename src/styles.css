@@ -1,0 +1,103 @@
+@import 'tailwindcss';
+@import '@fontsource/archivo-black';
+@import '@fontsource-variable/archivo';
+@import '@fontsource-variable/spline-sans-mono';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Deyno — neobrutalism "papel e tinta".
+ * Claro: papel creme, tinta preta, sombras duras pretas.
+ * Escuro: tinta invertida — fundo quase-preto, bordas e sombras cor de osso.
+ */
+:root {
+  --bg: #f2ecdd;
+  --surface: #fffdf5;
+  --surface-2: #f8f3e4;
+  --ink: #14120d;
+  --muted: #5c574a;
+  --line: #14120d;
+  --shadow-c: #14120d;
+}
+
+.dark {
+  --bg: #14120d;
+  --surface: #1e1b12;
+  --surface-2: #282417;
+  --ink: #f2ecdd;
+  --muted: #a8a292;
+  --line: #f2ecdd;
+  --shadow-c: #f2ecdd;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+
+  --color-primary: #ffd02e;
+  --color-primary-ink: #14120d;
+  --color-accent: #4d79ff;
+  --color-income: #1fc161;
+  --color-expense: #ff4e4e;
+  --color-warn: #ff9f1c;
+
+  --font-display: 'Archivo Black', sans-serif;
+  --font-sans: 'Archivo Variable', sans-serif;
+  --font-money: 'Spline Sans Mono Variable', monospace;
+
+  --shadow-brutal-sm: 2px 2px 0 0 var(--shadow-c);
+  --shadow-brutal: 4px 4px 0 0 var(--shadow-c);
+  --shadow-brutal-lg: 8px 8px 0 0 var(--shadow-c);
+
+  --radius-none: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  /* textura de papel sutil: pontos de tinta */
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--ink) 7%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
+}
+
+/* números sempre tabulares */
+.font-money {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--color-primary);
+  color: #14120d;
+}
+
+/* scrollbar brutalist */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ink);
+  border: 3px solid var(--bg);
+}
