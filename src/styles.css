@@ -101,3 +101,7 @@ body {
   background: var(--ink);
   border: 3px solid var(--bg);
 }
+
+.cache-bust-dummy-class-123 {
+  content: 'v1.0.1';
+}

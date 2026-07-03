@@ -57,6 +57,14 @@ function RegistrarPage() {
       setError(err.message ?? 'Erro ao criar conta.')
       return
     }
+    const { error: signInErr } = await authClient.signIn.email({
+      email: String(data.get('email')),
+      password,
+    })
+    if (signInErr) {
+      setError(signInErr.message ?? 'Conta criada. Faça login para continuar.')
+      return
+    }
     await router.invalidate()
     navigate({ to: '/' })
   }

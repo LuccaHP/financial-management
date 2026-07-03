@@ -5,10 +5,12 @@ import { getContext } from './integrations/tanstack-query/root-provider'
 
 export function getRouter() {
   const context = getContext()
+  const basepath = import.meta.env.VITE_APP_BASE_PATH || undefined
 
   const router = createTanStackRouter({
     routeTree,
     context,
+    basepath,
     scrollRestoration: true,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,

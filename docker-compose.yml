@@ -20,7 +20,10 @@ services:
     restart: unless-stopped
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        APP_BASE_PATH: ${APP_BASE_PATH:-}
     container_name: deyno_app
     ports:
       # 3000/3001/3333/8080/9999 ocupadas no host → 3002
@@ -28,8 +31,10 @@ services:
     environment:
       DATABASE_URL: postgres://deyno:${POSTGRES_PASSWORD}@db:5432/deyno
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      BETTER_AUTH_URL: ${PUBLIC_URL}
+      BETTER_AUTH_URL: ${PUBLIC_URL}/api/auth
       PUBLIC_URL: ${PUBLIC_URL}
+      APP_BASE_PATH: ${APP_BASE_PATH:-}
+      VITE_APP_BASE_PATH: ${APP_BASE_PATH:-}
     depends_on:
       db:
         condition: service_healthy

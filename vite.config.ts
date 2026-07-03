@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import type { Plugin } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 
@@ -39,16 +39,33 @@ function stubNodeOnlyInClient(): Plugin {
   }
 }
 
-const config = defineConfig({
-  resolve: { tsconfigPaths: true },
-  plugins: [
-    stubNodeOnlyInClient(),
-    devtools(),
-    nitro({ rollupConfig: { external: [/^@sentry\//] } }),
-    tailwindcss(),
-    tanstackStart(),
-    viteReact(),
-  ],
+function normalizeBasePath(value: string | undefined) {
+  if (!value || value === '/') return ''
+  return `/${value.replace(/^\/+|\/+$/g, '')}`
+}
+
+const config = defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const basePath = normalizeBasePath(env.APP_BASE_PATH ?? env.VITE_APP_BASE_PATH)
+
+  return {
+    base: basePath ? `${basePath}/` : '/',
+    define: {
+      'import.meta.env.VITE_APP_BASE_PATH': JSON.stringify(basePath),
+    },
+    resolve: { tsconfigPaths: true },
+    plugins: [
+      stubNodeOnlyInClient(),
+      devtools(),
+      nitro({
+        baseURL: basePath,
+        rollupConfig: { external: [/^@sentry\//] }
+      }),
+      tailwindcss(),
+      tanstackStart(),
+      viteReact(),
+    ],
+  }
 })
 
 export default config

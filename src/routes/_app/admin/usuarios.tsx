@@ -19,7 +19,7 @@ import {
   listUsersFn,
   revokeInviteFn,
 } from '#/functions/admin.fn'
-import { authClient } from '#/lib/auth-client'
+import { authAdminClient } from '#/lib/auth-admin-client'
 import { formatDateBR } from '#/lib/dates'
 
 const usersQuery = queryOptions({
@@ -66,8 +66,8 @@ function UsuariosPage() {
   const banMutation = useMutation({
     mutationFn: async ({ id, banned }: { id: string; banned: boolean }) => {
       const result = banned
-        ? await authClient.admin.unbanUser({ userId: id })
-        : await authClient.admin.banUser({ userId: id })
+        ? await authAdminClient.admin.unbanUser({ userId: id })
+        : await authAdminClient.admin.banUser({ userId: id })
       if (result.error) throw new Error(result.error.message)
     },
     onSuccess: () =>
@@ -266,7 +266,7 @@ function CreateUserDialog({
       email: string
       password: string
     }) => {
-      const result = await authClient.admin.createUser({
+      const result = await authAdminClient.admin.createUser({
         name: data.name,
         email: data.email,
         password: data.password,

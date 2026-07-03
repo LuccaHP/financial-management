@@ -9,6 +9,8 @@ RUN pnpm install --frozen-lockfile
 FROM node:22-alpine AS build
 WORKDIR /app
 RUN corepack enable pnpm
+ARG APP_BASE_PATH=
+ENV VITE_APP_BASE_PATH=$APP_BASE_PATH
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm build
