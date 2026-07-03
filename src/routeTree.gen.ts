@@ -13,6 +13,8 @@ import { Route as RegistrarRouteImport } from './routes/registrar'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppContasRouteImport } from './routes/_app/contas'
+import { Route as AppCategoriasRouteImport } from './routes/_app/categorias'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const RegistrarRoute = RegistrarRouteImport.update({
@@ -34,6 +36,16 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppContasRoute = AppContasRouteImport.update({
+  id: '/contas',
+  path: '/contas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCategoriasRoute = AppCategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
+  getParentRoute: () => AppRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -44,11 +56,15 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/registrar': typeof RegistrarRoute
+  '/categorias': typeof AppCategoriasRoute
+  '/contas': typeof AppContasRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/registrar': typeof RegistrarRoute
+  '/categorias': typeof AppCategoriasRoute
+  '/contas': typeof AppContasRoute
   '/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -57,15 +73,26 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/registrar': typeof RegistrarRoute
+  '/_app/categorias': typeof AppCategoriasRoute
+  '/_app/contas': typeof AppContasRoute
   '/_app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/registrar' | '/api/auth/$'
+  fullPaths:
+    '/' | '/login' | '/registrar' | '/categorias' | '/contas' | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/registrar' | '/' | '/api/auth/$'
-  id: '__root__' | '/_app' | '/login' | '/registrar' | '/_app/' | '/api/auth/$'
+  to: '/login' | '/registrar' | '/categorias' | '/contas' | '/' | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/login'
+    | '/registrar'
+    | '/_app/categorias'
+    | '/_app/contas'
+    | '/_app/'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -105,6 +132,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/contas': {
+      id: '/_app/contas'
+      path: '/contas'
+      fullPath: '/contas'
+      preLoaderRoute: typeof AppContasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/categorias': {
+      id: '/_app/categorias'
+      path: '/categorias'
+      fullPath: '/categorias'
+      preLoaderRoute: typeof AppCategoriasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -116,10 +157,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppCategoriasRoute: typeof AppCategoriasRoute
+  AppContasRoute: typeof AppContasRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppCategoriasRoute: AppCategoriasRoute,
+  AppContasRoute: AppContasRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
