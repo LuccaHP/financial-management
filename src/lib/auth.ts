@@ -27,8 +27,24 @@ async function findValidInvite(token: string) {
   return invite
 }
 
+// Origens confiáveis (proteção CSRF do Better Auth). Aceita a URL principal
+// e uma lista extra via env TRUSTED_ORIGINS (separada por vírgula), útil quando
+// o app é acessado por IP, localhost e/ou domínio ao mesmo tempo.
+const trustedOrigins = Array.from(
+  new Set(
+    [
+      process.env.BETTER_AUTH_URL,
+      process.env.PUBLIC_URL,
+      ...(process.env.TRUSTED_ORIGINS?.split(',') ?? []),
+    ]
+      .map((o) => o?.trim())
+      .filter((o): o is string => Boolean(o)),
+  ),
+)
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: 'pg' }),
+  trustedOrigins,
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
