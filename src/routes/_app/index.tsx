@@ -8,7 +8,7 @@ import { Progress } from '#/components/ui/progress'
 import { Select } from '#/components/ui/select'
 import { formatCentavos } from '#/lib/money'
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute('/_app/')({ component: Home })
 
 // Página temporária de verificação do design system — vira o dashboard na fase 9.
 function Home() {
