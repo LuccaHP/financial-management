@@ -15,6 +15,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppContasRouteImport } from './routes/_app/contas'
 import { Route as AppCategoriasRouteImport } from './routes/_app/categorias'
+import { Route as AppTransacoesIndexRouteImport } from './routes/_app/transacoes/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const RegistrarRoute = RegistrarRouteImport.update({
@@ -46,6 +47,11 @@ const AppCategoriasRoute = AppCategoriasRouteImport.update({
   path: '/categorias',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTransacoesIndexRoute = AppTransacoesIndexRouteImport.update({
+  id: '/transacoes/',
+  path: '/transacoes/',
+  getParentRoute: () => AppRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/categorias': typeof AppCategoriasRoute
   '/contas': typeof AppContasRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/transacoes/': typeof AppTransacoesIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/contas': typeof AppContasRoute
   '/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/transacoes': typeof AppTransacoesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,13 +85,27 @@ export interface FileRoutesById {
   '/_app/contas': typeof AppContasRoute
   '/_app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_app/transacoes/': typeof AppTransacoesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/login' | '/registrar' | '/categorias' | '/contas' | '/api/auth/$'
+    | '/'
+    | '/login'
+    | '/registrar'
+    | '/categorias'
+    | '/contas'
+    | '/api/auth/$'
+    | '/transacoes/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/registrar' | '/categorias' | '/contas' | '/' | '/api/auth/$'
+  to:
+    | '/login'
+    | '/registrar'
+    | '/categorias'
+    | '/contas'
+    | '/'
+    | '/api/auth/$'
+    | '/transacoes'
   id:
     | '__root__'
     | '/_app'
@@ -93,6 +115,7 @@ export interface FileRouteTypes {
     | '/_app/contas'
     | '/_app/'
     | '/api/auth/$'
+    | '/_app/transacoes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -146,6 +169,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCategoriasRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/transacoes/': {
+      id: '/_app/transacoes/'
+      path: '/transacoes'
+      fullPath: '/transacoes/'
+      preLoaderRoute: typeof AppTransacoesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -160,12 +190,14 @@ interface AppRouteChildren {
   AppCategoriasRoute: typeof AppCategoriasRoute
   AppContasRoute: typeof AppContasRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppTransacoesIndexRoute: typeof AppTransacoesIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppCategoriasRoute: AppCategoriasRoute,
   AppContasRoute: AppContasRoute,
   AppIndexRoute: AppIndexRoute,
+  AppTransacoesIndexRoute: AppTransacoesIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
