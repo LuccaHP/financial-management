@@ -18,8 +18,10 @@ import { Route as AppOrcamentosRouteImport } from './routes/_app/orcamentos'
 import { Route as AppContasRouteImport } from './routes/_app/contas'
 import { Route as AppCategoriasRouteImport } from './routes/_app/categorias'
 import { Route as AppTransacoesIndexRouteImport } from './routes/_app/transacoes/index'
+import { Route as AppObjetivosIndexRouteImport } from './routes/_app/objetivos/index'
 import { Route as AppCartoesIndexRouteImport } from './routes/_app/cartoes/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AppObjetivosGoalIdRouteImport } from './routes/_app/objetivos/$goalId'
 import { Route as AppCartoesCardIdRouteImport } from './routes/_app/cartoes/$cardId'
 
 const RegistrarRoute = RegistrarRouteImport.update({
@@ -66,6 +68,11 @@ const AppTransacoesIndexRoute = AppTransacoesIndexRouteImport.update({
   path: '/transacoes/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppObjetivosIndexRoute = AppObjetivosIndexRouteImport.update({
+  id: '/objetivos/',
+  path: '/objetivos/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCartoesIndexRoute = AppCartoesIndexRouteImport.update({
   id: '/cartoes/',
   path: '/cartoes/',
@@ -75,6 +82,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppObjetivosGoalIdRoute = AppObjetivosGoalIdRouteImport.update({
+  id: '/objetivos/$goalId',
+  path: '/objetivos/$goalId',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppCartoesCardIdRoute = AppCartoesCardIdRouteImport.update({
   id: '/cartoes/$cardId',
@@ -91,8 +103,10 @@ export interface FileRoutesByFullPath {
   '/orcamentos': typeof AppOrcamentosRoute
   '/recorrentes': typeof AppRecorrentesRoute
   '/cartoes/$cardId': typeof AppCartoesCardIdRoute
+  '/objetivos/$goalId': typeof AppObjetivosGoalIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/cartoes/': typeof AppCartoesIndexRoute
+  '/objetivos/': typeof AppObjetivosIndexRoute
   '/transacoes/': typeof AppTransacoesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -104,8 +118,10 @@ export interface FileRoutesByTo {
   '/recorrentes': typeof AppRecorrentesRoute
   '/': typeof AppIndexRoute
   '/cartoes/$cardId': typeof AppCartoesCardIdRoute
+  '/objetivos/$goalId': typeof AppObjetivosGoalIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/cartoes': typeof AppCartoesIndexRoute
+  '/objetivos': typeof AppObjetivosIndexRoute
   '/transacoes': typeof AppTransacoesIndexRoute
 }
 export interface FileRoutesById {
@@ -119,8 +135,10 @@ export interface FileRoutesById {
   '/_app/recorrentes': typeof AppRecorrentesRoute
   '/_app/': typeof AppIndexRoute
   '/_app/cartoes/$cardId': typeof AppCartoesCardIdRoute
+  '/_app/objetivos/$goalId': typeof AppObjetivosGoalIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_app/cartoes/': typeof AppCartoesIndexRoute
+  '/_app/objetivos/': typeof AppObjetivosIndexRoute
   '/_app/transacoes/': typeof AppTransacoesIndexRoute
 }
 export interface FileRouteTypes {
@@ -134,8 +152,10 @@ export interface FileRouteTypes {
     | '/orcamentos'
     | '/recorrentes'
     | '/cartoes/$cardId'
+    | '/objetivos/$goalId'
     | '/api/auth/$'
     | '/cartoes/'
+    | '/objetivos/'
     | '/transacoes/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -147,8 +167,10 @@ export interface FileRouteTypes {
     | '/recorrentes'
     | '/'
     | '/cartoes/$cardId'
+    | '/objetivos/$goalId'
     | '/api/auth/$'
     | '/cartoes'
+    | '/objetivos'
     | '/transacoes'
   id:
     | '__root__'
@@ -161,8 +183,10 @@ export interface FileRouteTypes {
     | '/_app/recorrentes'
     | '/_app/'
     | '/_app/cartoes/$cardId'
+    | '/_app/objetivos/$goalId'
     | '/api/auth/$'
     | '/_app/cartoes/'
+    | '/_app/objetivos/'
     | '/_app/transacoes/'
   fileRoutesById: FileRoutesById
 }
@@ -238,6 +262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTransacoesIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/objetivos/': {
+      id: '/_app/objetivos/'
+      path: '/objetivos'
+      fullPath: '/objetivos/'
+      preLoaderRoute: typeof AppObjetivosIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/cartoes/': {
       id: '/_app/cartoes/'
       path: '/cartoes'
@@ -251,6 +282,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/objetivos/$goalId': {
+      id: '/_app/objetivos/$goalId'
+      path: '/objetivos/$goalId'
+      fullPath: '/objetivos/$goalId'
+      preLoaderRoute: typeof AppObjetivosGoalIdRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/cartoes/$cardId': {
       id: '/_app/cartoes/$cardId'
@@ -269,7 +307,9 @@ interface AppRouteChildren {
   AppRecorrentesRoute: typeof AppRecorrentesRoute
   AppIndexRoute: typeof AppIndexRoute
   AppCartoesCardIdRoute: typeof AppCartoesCardIdRoute
+  AppObjetivosGoalIdRoute: typeof AppObjetivosGoalIdRoute
   AppCartoesIndexRoute: typeof AppCartoesIndexRoute
+  AppObjetivosIndexRoute: typeof AppObjetivosIndexRoute
   AppTransacoesIndexRoute: typeof AppTransacoesIndexRoute
 }
 
@@ -280,7 +320,9 @@ const AppRouteChildren: AppRouteChildren = {
   AppRecorrentesRoute: AppRecorrentesRoute,
   AppIndexRoute: AppIndexRoute,
   AppCartoesCardIdRoute: AppCartoesCardIdRoute,
+  AppObjetivosGoalIdRoute: AppObjetivosGoalIdRoute,
   AppCartoesIndexRoute: AppCartoesIndexRoute,
+  AppObjetivosIndexRoute: AppObjetivosIndexRoute,
   AppTransacoesIndexRoute: AppTransacoesIndexRoute,
 }
 
