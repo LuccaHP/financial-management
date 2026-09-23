@@ -93,7 +93,13 @@ const transactionInput = z.object({
   type: z.enum(['income', 'expense']),
   amountCents: z.number().int().positive(),
   description: z.string().trim().min(1).max(200),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    // ano digitado errado (ex.: 6202) some dos filtros de mês — rejeita cedo
+    .refine((value) => value >= '1970-01-01' && value <= '2100-12-31', {
+      message: 'Data fora do intervalo válido.',
+    }),
   accountId: z.uuid(),
   categoryId: z.uuid(),
 })

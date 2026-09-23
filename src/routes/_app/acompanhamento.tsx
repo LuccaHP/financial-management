@@ -25,7 +25,10 @@ import { TransactionFormDialog } from '#/components/transaction-form-dialog'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card } from '#/components/ui/card'
-import { listMonthlyBillsFn } from '#/functions/bills.fn'
+import {
+  listMonthlyBillsFn,
+  setRecurringOccurrencePaidFn,
+} from '#/functions/bills.fn'
 import {
   deleteTransactionFn,
   setTransactionsPaidFn,
@@ -90,11 +93,52 @@ function AcompanhamentoPage() {
   const unpaidTxIds = unpaid
     .filter((item) => item.kind === 'lancamento' && item.txId)
     .map((item) => item.txId!)
+  const unpaidRules = unpaid.filter(
+    (item) => item.kind === 'prevista' && item.ruleId,
+  )
+  const bulkCount = unpaidTxIds.length + unpaidRules.length
 
   const paidMutation = useMutation({
-    mutationFn: (vars: { ids: Array<string>; paid: boolean }) =>
-      setTransactionsPaidFn({ data: vars }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bills'] }),
+    mutationFn: (vars: { item: BillItem; paid: boolean }) =>
+      vars.item.kind === 'prevista'
+        ? setRecurringOccurrencePaidFn({
+            data: {
+              ruleId: vars.item.ruleId!,
+              month: vars.item.date.slice(0, 7),
+              paid: vars.paid,
+            },
+          })
+        : setTransactionsPaidFn({
+            data: { ids: [vars.item.txId!], paid: vars.paid },
+          }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bills'] })
+      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+    },
+    onError: (error) => alert(error.message),
+  })
+
+  const bulkMutation = useMutation({
+    mutationFn: async () => {
+      if (unpaidTxIds.length > 0) {
+        await setTransactionsPaidFn({ data: { ids: unpaidTxIds, paid: true } })
+      }
+      await Promise.all(
+        unpaidRules.map((item) =>
+          setRecurringOccurrencePaidFn({
+            data: {
+              ruleId: item.ruleId!,
+              month: item.date.slice(0, 7),
+              paid: true,
+            },
+          }),
+        ),
+      )
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bills'] })
+      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+    },
     onError: (error) => alert(error.message),
   })
 
@@ -119,17 +163,17 @@ function AcompanhamentoPage() {
         subtitle="O que pagar no mês, ordenado por vencimento"
         actions={
           <>
-            {unpaidTxIds.length > 0 && (
+            {bulkCount > 0 && (
               <Button
                 variant="secondary"
-                disabled={paidMutation.isPending}
+                disabled={bulkMutation.isPending}
                 onClick={() => {
                   if (
                     confirm(
-                      `Marcar ${unpaidTxIds.length} lançamento${unpaidTxIds.length > 1 ? 's' : ''} do mês como pago${unpaidTxIds.length > 1 ? 's' : ''}?`,
+                      `Marcar ${bulkCount} item${bulkCount > 1 ? 's' : ''} do mês como pago${bulkCount > 1 ? 's' : ''}?`,
                     )
                   )
-                    paidMutation.mutate({ ids: unpaidTxIds, paid: true })
+                    bulkMutation.mutate()
                 }}
               >
                 <CheckCheck className="size-4" strokeWidth={2.5} />
@@ -204,10 +248,7 @@ function AcompanhamentoPage() {
                 item={item}
                 today={today}
                 onEdit={() => editItem(item)}
-                onTogglePaid={(paid) =>
-                  item.txId &&
-                  paidMutation.mutate({ ids: [item.txId], paid })
-                }
+                onTogglePaid={(paid) => paidMutation.mutate({ item, paid })}
                 togglePending={paidMutation.isPending}
               />
             ))}
@@ -255,29 +296,8 @@ function BillRow({
   })
 
   return (
-    <li
-      className={cn(
-        'group flex items-center gap-3 p-3 hover:bg-surface-2',
-        item.kind === 'prevista' && 'opacity-70 hover:opacity-100',
-        item.paid && 'opacity-60',
-      )}
-    >
-      {item.kind === 'lancamento' ? (
-        <button
-          type="button"
-          disabled={togglePending}
-          onClick={() => onTogglePaid(!item.paid)}
-          title={item.paid ? 'Desmarcar pagamento' : 'Marcar como pago'}
-          className={cn(
-            'flex size-6 shrink-0 cursor-pointer items-center justify-center border-2 border-line',
-            item.paid
-              ? 'bg-income text-[#14120d]'
-              : 'bg-surface hover:bg-surface-2',
-          )}
-        >
-          {item.paid && <Check className="size-4" strokeWidth={3.5} />}
-        </button>
-      ) : item.kind === 'fatura' ? (
+    <li className="group flex items-center gap-3 p-3 hover:bg-surface-2">
+      {item.kind === 'fatura' ? (
         <span
           title={
             item.paid
@@ -292,7 +312,20 @@ function BillRow({
           {item.paid && <Check className="size-4" strokeWidth={3.5} />}
         </span>
       ) : (
-        <span className="size-6 shrink-0 border-2 border-dashed border-line/50" />
+        <button
+          type="button"
+          disabled={togglePending}
+          onClick={() => onTogglePaid(!item.paid)}
+          title={item.paid ? 'Desmarcar pagamento' : 'Marcar como pago'}
+          className={cn(
+            'flex size-6 shrink-0 cursor-pointer items-center justify-center border-2 border-line',
+            item.paid
+              ? 'bg-income text-[#14120d]'
+              : 'bg-surface hover:bg-surface-2',
+          )}
+        >
+          {item.paid && <Check className="size-4" strokeWidth={3.5} />}
+        </button>
       )}
       <div
         className={cn(
@@ -314,9 +347,7 @@ function BillRow({
         />
       </span>
       <div className="min-w-0 flex-1">
-        <p className={cn('truncate font-bold', item.paid && 'line-through')}>
-          {item.description}
-        </p>
+        <p className="truncate font-bold">{item.description}</p>
         <p className="truncate text-xs text-muted">
           {formatDateBR(item.date)}
           {item.categoryName && ` · ${item.categoryName}`}

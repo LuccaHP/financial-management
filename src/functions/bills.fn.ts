@@ -110,6 +110,20 @@ export const listMonthlyBillsFn = createServerFn()
     // 2) Recorrentes ainda não materializadas no mês pedido (projeção).
     //    month >= nextOccurrenceMonth ⇒ a materialização ainda não passou por
     //    ali (e ocorrências apagadas pelo usuário não renascem na projeção).
+    //    Ocorrências materializadas antecipadamente (ex.: marcadas como pagas
+    //    num mês futuro) já entram como lançamento — ficam fora da projeção.
+    const materialized = await db
+      .select({ ruleId: transactions.recurringRuleId })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.userId, session.id),
+          eq(transactions.occurrenceMonth, month),
+        ),
+      )
+    const materializedRuleIds = new Set(
+      materialized.map((row) => row.ruleId).filter(Boolean),
+    )
     const projected = await db
       .select({
         id: recurringRules.id,
@@ -136,6 +150,7 @@ export const listMonthlyBillsFn = createServerFn()
       )
       .orderBy(asc(recurringRules.dayOfMonth))
     for (const rule of projected) {
+      if (materializedRuleIds.has(rule.id)) continue
       items.push({
         key: `rule-${rule.id}-${month}`,
         kind: 'prevista',
@@ -212,4 +227,62 @@ export const listMonthlyBillsFn = createServerFn()
         a.description.localeCompare(b.description),
     )
     return items
+  })
+
+/**
+ * Marca uma ocorrência PREVISTA de recorrente como paga: materializa o
+ * lançamento do mês antecipadamente (idempotente pelo unique parcial
+ * rule+mês) já com paid_at. Quando o mês chegar, a materialização normal
+ * faz onConflictDoNothing e não duplica.
+ */
+export const setRecurringOccurrencePaidFn = createServerFn({ method: 'POST' })
+  .inputValidator(
+    z.object({
+      ruleId: z.uuid(),
+      month: z.string().regex(/^\d{4}-\d{2}$/),
+      paid: z.boolean(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const session = await ensureSession()
+    const [rule] = await db
+      .select()
+      .from(recurringRules)
+      .where(
+        and(
+          eq(recurringRules.id, data.ruleId),
+          eq(recurringRules.userId, session.id),
+        ),
+      )
+    if (!rule) throw new Error('Recorrente não encontrada')
+    if (
+      data.month < rule.startMonth ||
+      (rule.endMonth !== null && data.month > rule.endMonth)
+    ) {
+      throw new Error('Mês fora da vigência da recorrente')
+    }
+
+    await db
+      .insert(transactions)
+      .values({
+        userId: session.id,
+        accountId: rule.accountId,
+        categoryId: rule.categoryId,
+        type: rule.type,
+        amountCents: rule.amountCents,
+        description: rule.description,
+        date: dateInMonth(data.month, rule.dayOfMonth),
+        recurringRuleId: rule.id,
+        occurrenceMonth: data.month,
+      })
+      .onConflictDoNothing()
+    await db
+      .update(transactions)
+      .set({ paidAt: data.paid ? new Date() : null })
+      .where(
+        and(
+          eq(transactions.recurringRuleId, rule.id),
+          eq(transactions.occurrenceMonth, data.month),
+        ),
+      )
   })
