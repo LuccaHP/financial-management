@@ -18,6 +18,7 @@ import { Route as AppOrcamentosRouteImport } from './routes/_app/orcamentos'
 import { Route as AppContasRouteImport } from './routes/_app/contas'
 import { Route as AppConfiguracoesRouteImport } from './routes/_app/configuracoes'
 import { Route as AppCategoriasRouteImport } from './routes/_app/categorias'
+import { Route as AppAcompanhamentoRouteImport } from './routes/_app/acompanhamento'
 import { Route as AppTransacoesIndexRouteImport } from './routes/_app/transacoes/index'
 import { Route as AppObjetivosIndexRouteImport } from './routes/_app/objetivos/index'
 import { Route as AppCartoesIndexRouteImport } from './routes/_app/cartoes/index'
@@ -71,6 +72,11 @@ const AppCategoriasRoute = AppCategoriasRouteImport.update({
   path: '/categorias',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAcompanhamentoRoute = AppAcompanhamentoRouteImport.update({
+  id: '/acompanhamento',
+  path: '/acompanhamento',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppTransacoesIndexRoute = AppTransacoesIndexRouteImport.update({
   id: '/transacoes/',
   path: '/transacoes/',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/login': typeof LoginRoute
   '/registrar': typeof RegistrarRoute
+  '/acompanhamento': typeof AppAcompanhamentoRoute
   '/categorias': typeof AppCategoriasRoute
   '/configuracoes': typeof AppConfiguracoesRoute
   '/contas': typeof AppContasRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/registrar': typeof RegistrarRoute
+  '/acompanhamento': typeof AppAcompanhamentoRoute
   '/categorias': typeof AppCategoriasRoute
   '/configuracoes': typeof AppConfiguracoesRoute
   '/contas': typeof AppContasRoute
@@ -153,6 +161,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/registrar': typeof RegistrarRoute
+  '/_app/acompanhamento': typeof AppAcompanhamentoRoute
   '/_app/categorias': typeof AppCategoriasRoute
   '/_app/configuracoes': typeof AppConfiguracoesRoute
   '/_app/contas': typeof AppContasRoute
@@ -174,6 +183,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/registrar'
+    | '/acompanhamento'
     | '/categorias'
     | '/configuracoes'
     | '/contas'
@@ -191,6 +201,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/registrar'
+    | '/acompanhamento'
     | '/categorias'
     | '/configuracoes'
     | '/contas'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/login'
     | '/registrar'
+    | '/_app/acompanhamento'
     | '/_app/categorias'
     | '/_app/configuracoes'
     | '/_app/contas'
@@ -298,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCategoriasRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/acompanhamento': {
+      id: '/_app/acompanhamento'
+      path: '/acompanhamento'
+      fullPath: '/acompanhamento'
+      preLoaderRoute: typeof AppAcompanhamentoRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/transacoes/': {
       id: '/_app/transacoes/'
       path: '/transacoes'
@@ -358,6 +377,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAcompanhamentoRoute: typeof AppAcompanhamentoRoute
   AppCategoriasRoute: typeof AppCategoriasRoute
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppContasRoute: typeof AppContasRoute
@@ -374,6 +394,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAcompanhamentoRoute: AppAcompanhamentoRoute,
   AppCategoriasRoute: AppCategoriasRoute,
   AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppContasRoute: AppContasRoute,
@@ -400,12 +421,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

@@ -8,6 +8,7 @@ import {
 } from '@tanstack/react-router'
 import {
   ArrowLeftRight,
+  CalendarClock,
   CreditCard,
   LayoutDashboard,
   LogOut,
@@ -41,6 +42,7 @@ export const Route = createFileRoute('/_app')({
 const NAV: Array<{ to: string; label: string; icon: LucideIcon }> = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/transacoes', label: 'Transações', icon: ArrowLeftRight },
+  { to: '/acompanhamento', label: 'Acompanhamento', icon: CalendarClock },
   { to: '/contas', label: 'Contas', icon: Wallet },
   { to: '/cartoes', label: 'Cartões', icon: CreditCard },
   { to: '/recorrentes', label: 'Recorrentes', icon: Repeat },

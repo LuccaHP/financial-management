@@ -14,7 +14,16 @@ import { nitro } from 'nitro/vite'
 // bundle do navegador, quebrando o app. Aqui trocamos esses módulos node-only
 // por um stub vazio APENAS no ambiente do cliente; o servidor usa o `pg` real.
 function stubNodeOnlyInClient(): Plugin {
-  const STUB = new Set(['pg', 'pg-native', 'pg-cloudflare', 'cloudflare:sockets'])
+  const STUB = new Set([
+    'pg',
+    'pg-native',
+    'pg-cloudflare',
+    'cloudflare:sockets',
+    // O próprio driver do drizzle para node-postgres usa `Buffer` no topo do
+    // módulo; se vazar para o cliente, quebra a hidratação ("Buffer is not
+    // defined") e o <form> de login faz submit nativo (recarrega a página).
+    'drizzle-orm/node-postgres',
+  ])
   const VIRTUAL = '\0virtual:node-only-stub'
   return {
     name: 'stub-node-only-in-client',
@@ -34,6 +43,7 @@ function stubNodeOnlyInClient(): Plugin {
         'export const Pool = proxy',
         'export const Client = proxy',
         'export const types = proxy',
+        'export const drizzle = proxy',
       ].join('\n')
     },
   }
