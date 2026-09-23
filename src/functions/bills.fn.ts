@@ -32,6 +32,12 @@ export type BillItem = {
   categoryIcon: string | null
   sourceName: string
   paid: boolean
+  // referências para as ações da UI (editar/excluir/navegar)
+  txId: string | null
+  accountId: string | null
+  categoryId: string | null
+  ruleId: string | null
+  cardId: string | null
 }
 
 const listInput = z.object({
@@ -55,7 +61,9 @@ export const listMonthlyBillsFn = createServerFn()
         amountCents: transactions.amountCents,
         description: transactions.description,
         date: transactions.date,
+        accountId: transactions.accountId,
         accountName: accounts.name,
+        categoryId: transactions.categoryId,
         categoryName: categories.name,
         categoryColor: categories.color,
         categoryIcon: categories.icon,
@@ -90,6 +98,11 @@ export const listMonthlyBillsFn = createServerFn()
         categoryIcon: row.categoryIcon,
         sourceName: row.accountName,
         paid: false,
+        txId: row.id,
+        accountId: row.accountId,
+        categoryId: row.categoryId,
+        ruleId: null,
+        cardId: null,
       })
     }
 
@@ -133,6 +146,11 @@ export const listMonthlyBillsFn = createServerFn()
         categoryIcon: rule.categoryIcon,
         sourceName: rule.accountName,
         paid: false,
+        txId: null,
+        accountId: null,
+        categoryId: null,
+        ruleId: rule.id,
+        cardId: null,
       })
     }
 
@@ -178,6 +196,11 @@ export const listMonthlyBillsFn = createServerFn()
           categoryIcon: 'credit-card',
           sourceName: card.name,
           paid: payment !== undefined,
+          txId: null,
+          accountId: null,
+          categoryId: null,
+          ruleId: null,
+          cardId: card.id,
         })
       }
     }

@@ -1,16 +1,40 @@
-import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { AlertTriangle, CalendarClock } from 'lucide-react'
+import {
+  queryOptions,
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from '@tanstack/react-query'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import {
+  AlertTriangle,
+  CalendarClock,
+  CreditCard,
+  Pencil,
+  Plus,
+  Repeat,
+  Trash2,
+} from 'lucide-react'
+import { useState } from 'react'
 import { z } from 'zod'
 import { CategoryIcon } from '#/components/category-icon'
 import { MonthNavigator } from '#/components/month-navigator'
 import { PageHeader } from '#/components/page-header'
+import { TransactionFormDialog } from '#/components/transaction-form-dialog'
 import { Badge } from '#/components/ui/badge'
+import { Button } from '#/components/ui/button'
 import { Card } from '#/components/ui/card'
 import { listMonthlyBillsFn } from '#/functions/bills.fn'
+import { deleteTransactionFn } from '#/functions/transactions.fn'
 import { cn } from '#/lib/cn'
-import { currentMonthKey, formatDateBR, todayKey } from '#/lib/dates'
+import {
+  currentMonthKey,
+  dateInMonth,
+  formatDateBR,
+  todayKey,
+} from '#/lib/dates'
 import { formatCentavos } from '#/lib/money'
+import { accountsQuery, categoriesQuery } from '#/lib/queries'
+import type { EditableTransaction } from '#/components/transaction-form-dialog'
 import type { BillItem } from '#/functions/bills.fn'
 
 const billsQuery = (month: string) =>
@@ -28,9 +52,13 @@ export const Route = createFileRoute('/_app/acompanhamento')({
   }),
   loaderDeps: ({ search }) => ({ mes: search.mes }),
   loader: ({ context, deps }) =>
-    context.queryClient.ensureQueryData(
-      billsQuery(deps.mes ?? currentMonthKey()),
-    ),
+    Promise.all([
+      context.queryClient.ensureQueryData(
+        billsQuery(deps.mes ?? currentMonthKey()),
+      ),
+      context.queryClient.ensureQueryData(accountsQuery),
+      context.queryClient.ensureQueryData(categoriesQuery),
+    ]),
   component: AcompanhamentoPage,
 })
 
@@ -39,6 +67,9 @@ function AcompanhamentoPage() {
   const month = search.mes ?? currentMonthKey()
   const navigate = useNavigate({ from: Route.fullPath })
   const { data: items } = useSuspenseQuery(billsQuery(month))
+
+  const [formOpen, setFormOpen] = useState(false)
+  const [editing, setEditing] = useState<EditableTransaction | null>(null)
 
   const today = todayKey()
   const unpaid = items.filter((item) => !item.paid)
@@ -49,11 +80,36 @@ function AcompanhamentoPage() {
     .filter((item) => item.date >= today)
     .reduce((sum, item) => sum + item.amountCents, 0)
 
+  function editItem(item: BillItem) {
+    if (!item.txId || !item.accountId) return
+    setEditing({
+      id: item.txId,
+      type: 'expense',
+      amountCents: item.amountCents,
+      description: item.description,
+      date: item.date,
+      accountId: item.accountId,
+      categoryId: item.categoryId,
+    })
+    setFormOpen(true)
+  }
+
   return (
     <div>
       <PageHeader
         title="Acompanhamento"
         subtitle="O que pagar no mês, ordenado por vencimento"
+        actions={
+          <Button
+            onClick={() => {
+              setEditing(null)
+              setFormOpen(true)
+            }}
+          >
+            <Plus className="size-4" strokeWidth={2.5} />
+            Nova despesa
+          </Button>
+        }
       />
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -103,24 +159,57 @@ function AcompanhamentoPage() {
         <Card>
           <ul className="divide-y-2 divide-line">
             {items.map((item) => (
-              <BillRow key={item.key} item={item} today={today} />
+              <BillRow
+                key={item.key}
+                item={item}
+                today={today}
+                onEdit={() => editItem(item)}
+              />
             ))}
           </ul>
         </Card>
       )}
+
+      <TransactionFormDialog
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        transaction={editing}
+        defaultDate={
+          month === currentMonthKey() ? todayKey() : dateInMonth(month, 1)
+        }
+      />
     </div>
   )
 }
 
-function BillRow({ item, today }: { item: BillItem; today: string }) {
+function BillRow({
+  item,
+  today,
+  onEdit,
+}: {
+  item: BillItem
+  today: string
+  onEdit: () => void
+}) {
+  const queryClient = useQueryClient()
   const isOverdue = !item.paid && item.date < today
   const isToday = !item.paid && item.date === today
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteTransactionFn({ data: { id: item.txId! } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bills'] })
+      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      queryClient.invalidateQueries({ queryKey: ['accounts'] })
+    },
+    onError: (error) => alert(error.message),
+  })
 
   return (
     <li
       className={cn(
-        'flex items-center gap-3 p-3',
-        item.kind === 'prevista' && 'opacity-70',
+        'group flex items-center gap-3 p-3 hover:bg-surface-2',
+        item.kind === 'prevista' && 'opacity-70 hover:opacity-100',
       )}
     >
       <div
@@ -161,6 +250,49 @@ function BillRow({ item, today }: { item: BillItem; today: string }) {
         <span className="font-money text-sm font-bold">
           {formatCentavos(item.amountCents)}
         </span>
+        <div className="flex gap-1 md:opacity-0 md:transition-opacity md:group-hover:opacity-100 md:focus-within:opacity-100">
+          {item.kind === 'lancamento' && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                title="Editar"
+                onClick={onEdit}
+              >
+                <Pencil className="size-4" strokeWidth={2.5} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                title="Excluir"
+                onClick={() => {
+                  if (confirm(`Excluir "${item.description}"?`))
+                    deleteMutation.mutate()
+                }}
+              >
+                <Trash2 className="size-4" strokeWidth={2.5} />
+              </Button>
+            </>
+          )}
+          {item.kind === 'prevista' && (
+            <Link to="/recorrentes" title="Editar recorrente">
+              <Button variant="ghost" size="icon">
+                <Repeat className="size-4" strokeWidth={2.5} />
+              </Button>
+            </Link>
+          )}
+          {item.kind === 'fatura' && item.cardId && (
+            <Link
+              to="/cartoes/$cardId"
+              params={{ cardId: item.cardId }}
+              title="Ver fatura"
+            >
+              <Button variant="ghost" size="icon">
+                <CreditCard className="size-4" strokeWidth={2.5} />
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
     </li>
   )
