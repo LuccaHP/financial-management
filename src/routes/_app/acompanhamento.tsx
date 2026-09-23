@@ -82,6 +82,7 @@ function AcompanhamentoPage() {
 
   const today = todayKey()
   const unpaid = items.filter((item) => !item.paid)
+  const totalCents = items.reduce((sum, item) => sum + item.amountCents, 0)
   const overdue = unpaid.filter((item) => item.date < today)
   const overdueCents = overdue.reduce((sum, item) => sum + item.amountCents, 0)
   const upcomingCents = unpaid
@@ -200,6 +201,9 @@ function AcompanhamentoPage() {
             navigate({ search: { mes: newMonth }, replace: true })
           }
         />
+        {items.length > 0 && (
+          <Badge variant="muted">Total {formatCentavos(totalCents)}</Badge>
+        )}
         {overdue.length > 0 && (
           <Badge variant="expense">
             <AlertTriangle className="size-3" strokeWidth={3} />
