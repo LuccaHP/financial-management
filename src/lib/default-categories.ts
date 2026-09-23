@@ -1,5 +1,6 @@
 // Categorias padrão criadas para cada novo usuário.
-// "Cartão de Crédito" é de sistema: usada nas transações de pagamento de fatura.
+// A categoria com isSystem recebe os pagamentos de fatura (lookup pela flag,
+// não pelo nome — pode ser renomeada à vontade).
 
 export const CARD_PAYMENT_CATEGORY = 'Cartão de Crédito'
 

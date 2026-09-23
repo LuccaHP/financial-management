@@ -11,7 +11,6 @@ import {
   invoicePayments,
   transactions,
 } from '#/db/schema'
-import { CARD_PAYMENT_CATEGORY } from '#/lib/default-categories'
 import { currentMonthKey, formatMonthPt, todayKey } from '#/lib/dates'
 import {
   dueDateFor,
@@ -449,13 +448,14 @@ export const payInvoiceFn = createServerFn({ method: 'POST' })
       )
     if (existing) throw new Error('Esta fatura já foi paga.')
 
+    // busca pela flag de sistema (não pelo nome) — a categoria é renomeável
     const [systemCategory] = await db
       .select({ id: categories.id })
       .from(categories)
       .where(
         and(
           eq(categories.userId, session.id),
-          eq(categories.name, CARD_PAYMENT_CATEGORY),
+          eq(categories.isSystem, true),
           eq(categories.type, 'despesa'),
         ),
       )

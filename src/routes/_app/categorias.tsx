@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { Archive, ArchiveRestore, Lock, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Archive, ArchiveRestore, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { CategoryIcon } from '#/components/category-icon'
 import { PageHeader } from '#/components/page-header'
@@ -180,9 +180,11 @@ function CategoryRow({
         {category.name}
       </span>
       {category.isSystem && (
-        <Badge variant="muted">
-          <Lock className="size-3" strokeWidth={2.5} />
-          Sistema
+        <Badge
+          variant="muted"
+          title="Recebe os pagamentos de fatura de cartão"
+        >
+          Fatura
         </Badge>
       )}
       {category.archived && <Badge variant="muted">Arquivada</Badge>}
@@ -290,7 +292,6 @@ function CategoryFormDialog({
             required
             maxLength={60}
             defaultValue={category?.name}
-            disabled={category?.isSystem}
             placeholder="Pets, Academia…"
           />
         </div>

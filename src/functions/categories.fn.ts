@@ -50,9 +50,6 @@ export const updateCategoryFn = createServerFn({ method: 'POST' })
       .from(categories)
       .where(and(eq(categories.id, id), eq(categories.userId, session.id)))
     if (!existing) throw new Error('Categoria não encontrada')
-    if (existing.isSystem && existing.name !== values.name) {
-      throw new Error('Categorias de sistema não podem ser renomeadas.')
-    }
     const [updated] = await db
       .update(categories)
       .set(values)

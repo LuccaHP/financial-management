@@ -118,7 +118,7 @@ function OrcamentosPage() {
 
       <p className="mb-4 border-2 border-line bg-surface-2 p-2 text-xs text-muted">
         Gastos no cartão de crédito contam no orçamento quando a fatura é paga
-        (categoria "Cartão de Crédito").
+        (na categoria marcada como "Fatura").
       </p>
 
       {withLimit.length === 0 ? (
