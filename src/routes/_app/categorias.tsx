@@ -9,7 +9,6 @@ import { Button } from '#/components/ui/button'
 import { Card } from '#/components/ui/card'
 import { Dialog } from '#/components/ui/dialog'
 import { FieldError, Input, Label } from '#/components/ui/input'
-import { Select } from '#/components/ui/select'
 import {
   createCategoryFn,
   deleteCategoryFn,
@@ -29,30 +28,81 @@ type Category = Awaited<
 >[number]
 
 const ICON_OPTIONS = [
+  // geral
   'tag',
+  'star',
+  'heart',
+  'sparkles',
+  'gift',
+  'trophy',
+  'ticket',
+  'repeat',
+  // comida e bebida
   'utensils',
   'shopping-cart',
+  'shopping-bag',
+  'coffee',
+  'pizza',
+  'beer',
+  'cake',
+  'salad',
+  'apple',
+  // casa e contas
   'home',
+  'key',
+  'zap',
+  'droplets',
+  'flame',
+  'lightbulb',
+  'wifi',
+  'phone',
+  'smartphone',
+  'wrench',
+  'hammer',
+  // transporte
   'car',
-  'heart-pulse',
-  'graduation-cap',
-  'gamepad-2',
-  'repeat',
-  'shirt',
+  'fuel',
+  'bus',
+  'bike',
   'plane',
+  'globe',
+  // saúde e cuidado
+  'heart-pulse',
+  'stethoscope',
+  'pill',
+  'scissors',
+  'dumbbell',
+  // educação e trabalho
+  'graduation-cap',
+  'book-open',
+  'briefcase',
+  'laptop',
+  'building-2',
+  // lazer
+  'gamepad-2',
+  'music',
+  'headphones',
+  'film',
+  'tv',
+  'palette',
+  // pets e família
+  'paw-print',
+  'dog',
+  'cat',
+  'fish',
+  'baby',
+  'shirt',
+  // dinheiro
   'landmark',
   'credit-card',
   'banknote',
-  'laptop',
+  'wallet',
+  'coins',
+  'piggy-bank',
   'trending-up',
   'rotate-ccw',
-  'gift',
-  'paw-print',
-  'baby',
-  'dumbbell',
-  'music',
-  'book-open',
-  'wrench',
+  'shield',
+  'umbrella',
 ]
 
 function CategoriasPage() {
@@ -265,7 +315,7 @@ function CategoryFormDialog({
     mutation.mutate({
       name: String(form.get('name')),
       color: String(form.get('color')),
-      icon: String(form.get('icon')),
+      icon,
     })
   }
 
@@ -295,36 +345,36 @@ function CategoryFormDialog({
             placeholder="Pets, Academia…"
           />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label htmlFor="category-icon">Ícone</Label>
-            <Select
-              id="category-icon"
-              name="icon"
-              value={icon}
-              onChange={(e) => setIcon(e.target.value)}
-            >
-              {ICON_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </Select>
-            <div className="mt-2 flex items-center gap-2 text-xs text-muted">
-              <CategoryIcon name={icon} className="size-4" />
-              Pré-visualização
-            </div>
+        <div>
+          <Label>Ícone</Label>
+          <div className="grid max-h-56 grid-cols-6 gap-2 overflow-y-auto border-2 border-line bg-surface p-2">
+            {ICON_OPTIONS.map((option) => (
+              <button
+                key={option}
+                type="button"
+                title={option}
+                onClick={() => setIcon(option)}
+                className={cn(
+                  'flex aspect-square cursor-pointer items-center justify-center border-2 border-line',
+                  icon === option
+                    ? 'bg-primary text-primary-ink shadow-brutal-sm'
+                    : 'bg-surface hover:bg-surface-2',
+                )}
+              >
+                <CategoryIcon name={option} className="size-5" />
+              </button>
+            ))}
           </div>
-          <div>
-            <Label htmlFor="category-color">Cor</Label>
-            <Input
-              id="category-color"
-              name="color"
-              type="color"
-              defaultValue={category?.color ?? '#4d79ff'}
-              className="h-[38px] cursor-pointer p-1"
-            />
-          </div>
+        </div>
+        <div>
+          <Label htmlFor="category-color">Cor</Label>
+          <Input
+            id="category-color"
+            name="color"
+            type="color"
+            defaultValue={category?.color ?? '#4d79ff'}
+            className="h-[38px] cursor-pointer p-1"
+          />
         </div>
         <FieldError message={error} />
         <div className="flex justify-end gap-2">
