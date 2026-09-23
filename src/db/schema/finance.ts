@@ -117,6 +117,8 @@ export const transactions = pgTable(
       { onDelete: 'set null' },
     ),
     occurrenceMonth: char('occurrence_month', { length: 7 }),
+    // marcador manual de "já paguei" (página de acompanhamento); não afeta saldo
+    paidAt: timestamp('paid_at'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (table) => [

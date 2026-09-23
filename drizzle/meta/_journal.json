@@ -8,6 +8,13 @@
       "when": 1783038507879,
       "tag": "0000_reflective_sunfire",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790183104079,
+      "tag": "0001_giant_microchip",
+      "breakpoints": true
     }
   ]
 }

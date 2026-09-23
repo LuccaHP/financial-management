@@ -67,6 +67,7 @@ export const listMonthlyBillsFn = createServerFn()
         categoryName: categories.name,
         categoryColor: categories.color,
         categoryIcon: categories.icon,
+        paidAt: transactions.paidAt,
         invoicePaymentId: invoicePayments.id,
       })
       .from(transactions)
@@ -97,7 +98,7 @@ export const listMonthlyBillsFn = createServerFn()
         categoryColor: row.categoryColor,
         categoryIcon: row.categoryIcon,
         sourceName: row.accountName,
-        paid: false,
+        paid: row.paidAt !== null,
         txId: row.id,
         accountId: row.accountId,
         categoryId: row.categoryId,

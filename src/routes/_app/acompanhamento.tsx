@@ -8,6 +8,8 @@ import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   AlertTriangle,
   CalendarClock,
+  Check,
+  CheckCheck,
   CreditCard,
   Pencil,
   Plus,
@@ -24,7 +26,10 @@ import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card } from '#/components/ui/card'
 import { listMonthlyBillsFn } from '#/functions/bills.fn'
-import { deleteTransactionFn } from '#/functions/transactions.fn'
+import {
+  deleteTransactionFn,
+  setTransactionsPaidFn,
+} from '#/functions/transactions.fn'
 import { cn } from '#/lib/cn'
 import {
   currentMonthKey,
@@ -66,6 +71,7 @@ function AcompanhamentoPage() {
   const search = Route.useSearch()
   const month = search.mes ?? currentMonthKey()
   const navigate = useNavigate({ from: Route.fullPath })
+  const queryClient = useQueryClient()
   const { data: items } = useSuspenseQuery(billsQuery(month))
 
   const [formOpen, setFormOpen] = useState(false)
@@ -73,12 +79,24 @@ function AcompanhamentoPage() {
 
   const today = todayKey()
   const unpaid = items.filter((item) => !item.paid)
-  const totalCents = items.reduce((sum, item) => sum + item.amountCents, 0)
   const overdue = unpaid.filter((item) => item.date < today)
   const overdueCents = overdue.reduce((sum, item) => sum + item.amountCents, 0)
   const upcomingCents = unpaid
     .filter((item) => item.date >= today)
     .reduce((sum, item) => sum + item.amountCents, 0)
+  const paidCents = items
+    .filter((item) => item.paid)
+    .reduce((sum, item) => sum + item.amountCents, 0)
+  const unpaidTxIds = unpaid
+    .filter((item) => item.kind === 'lancamento' && item.txId)
+    .map((item) => item.txId!)
+
+  const paidMutation = useMutation({
+    mutationFn: (vars: { ids: Array<string>; paid: boolean }) =>
+      setTransactionsPaidFn({ data: vars }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['bills'] }),
+    onError: (error) => alert(error.message),
+  })
 
   function editItem(item: BillItem) {
     if (!item.txId || !item.accountId) return
@@ -100,15 +118,34 @@ function AcompanhamentoPage() {
         title="Acompanhamento"
         subtitle="O que pagar no mês, ordenado por vencimento"
         actions={
-          <Button
-            onClick={() => {
-              setEditing(null)
-              setFormOpen(true)
-            }}
-          >
-            <Plus className="size-4" strokeWidth={2.5} />
-            Nova despesa
-          </Button>
+          <>
+            {unpaidTxIds.length > 0 && (
+              <Button
+                variant="secondary"
+                disabled={paidMutation.isPending}
+                onClick={() => {
+                  if (
+                    confirm(
+                      `Marcar ${unpaidTxIds.length} lançamento${unpaidTxIds.length > 1 ? 's' : ''} do mês como pago${unpaidTxIds.length > 1 ? 's' : ''}?`,
+                    )
+                  )
+                    paidMutation.mutate({ ids: unpaidTxIds, paid: true })
+                }}
+              >
+                <CheckCheck className="size-4" strokeWidth={2.5} />
+                Marcar tudo como pago
+              </Button>
+            )}
+            <Button
+              onClick={() => {
+                setEditing(null)
+                setFormOpen(true)
+              }}
+            >
+              <Plus className="size-4" strokeWidth={2.5} />
+              Nova despesa
+            </Button>
+          </>
         }
       />
 
@@ -119,9 +156,6 @@ function AcompanhamentoPage() {
             navigate({ search: { mes: newMonth }, replace: true })
           }
         />
-        {items.length > 0 && (
-          <Badge variant="muted">Total {formatCentavos(totalCents)}</Badge>
-        )}
         {overdue.length > 0 && (
           <Badge variant="expense">
             <AlertTriangle className="size-3" strokeWidth={3} />
@@ -134,11 +168,17 @@ function AcompanhamentoPage() {
             A vencer {formatCentavos(upcomingCents)}
           </Badge>
         )}
+        {paidCents > 0 && (
+          <Badge variant="income">
+            <Check className="size-3" strokeWidth={3} />
+            Pago {formatCentavos(paidCents)}
+          </Badge>
+        )}
       </div>
 
       <p className="mb-4 border-2 border-line bg-surface-2 p-2 text-xs text-muted">
-        Itens "previstos" vêm das recorrentes ativas e viram lançamentos de
-        verdade quando o mês chega.
+        Marque o quadrado ao lado do item quando pagar. Itens "previstos" vêm
+        das recorrentes ativas e viram lançamentos quando o mês chega.
       </p>
 
       {items.length === 0 ? (
@@ -164,6 +204,11 @@ function AcompanhamentoPage() {
                 item={item}
                 today={today}
                 onEdit={() => editItem(item)}
+                onTogglePaid={(paid) =>
+                  item.txId &&
+                  paidMutation.mutate({ ids: [item.txId], paid })
+                }
+                togglePending={paidMutation.isPending}
               />
             ))}
           </ul>
@@ -186,10 +231,14 @@ function BillRow({
   item,
   today,
   onEdit,
+  onTogglePaid,
+  togglePending,
 }: {
   item: BillItem
   today: string
   onEdit: () => void
+  onTogglePaid: (paid: boolean) => void
+  togglePending: boolean
 }) {
   const queryClient = useQueryClient()
   const isOverdue = !item.paid && item.date < today
@@ -210,8 +259,41 @@ function BillRow({
       className={cn(
         'group flex items-center gap-3 p-3 hover:bg-surface-2',
         item.kind === 'prevista' && 'opacity-70 hover:opacity-100',
+        item.paid && 'opacity-60',
       )}
     >
+      {item.kind === 'lancamento' ? (
+        <button
+          type="button"
+          disabled={togglePending}
+          onClick={() => onTogglePaid(!item.paid)}
+          title={item.paid ? 'Desmarcar pagamento' : 'Marcar como pago'}
+          className={cn(
+            'flex size-6 shrink-0 cursor-pointer items-center justify-center border-2 border-line',
+            item.paid
+              ? 'bg-income text-[#14120d]'
+              : 'bg-surface hover:bg-surface-2',
+          )}
+        >
+          {item.paid && <Check className="size-4" strokeWidth={3.5} />}
+        </button>
+      ) : item.kind === 'fatura' ? (
+        <span
+          title={
+            item.paid
+              ? 'Fatura paga'
+              : 'Pague a fatura na tela do cartão'
+          }
+          className={cn(
+            'flex size-6 shrink-0 items-center justify-center border-2 border-line',
+            item.paid ? 'bg-income text-[#14120d]' : 'bg-surface-2',
+          )}
+        >
+          {item.paid && <Check className="size-4" strokeWidth={3.5} />}
+        </span>
+      ) : (
+        <span className="size-6 shrink-0 border-2 border-dashed border-line/50" />
+      )}
       <div
         className={cn(
           'w-12 shrink-0 border-2 border-line py-1 text-center',
@@ -232,7 +314,9 @@ function BillRow({
         />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate font-bold">{item.description}</p>
+        <p className={cn('truncate font-bold', item.paid && 'line-through')}>
+          {item.description}
+        </p>
         <p className="truncate text-xs text-muted">
           {formatDateBR(item.date)}
           {item.categoryName && ` · ${item.categoryName}`}
@@ -240,7 +324,11 @@ function BillRow({
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        {item.paid && <Badge variant="income">Paga</Badge>}
+        {item.paid && (
+          <Badge variant="income">
+            {item.kind === 'fatura' ? 'Paga' : 'Pago'}
+          </Badge>
+        )}
         {isOverdue && <Badge variant="expense">Vencido</Badge>}
         {isToday && <Badge variant="warn">Hoje</Badge>}
         {item.kind === 'prevista' && <Badge variant="muted">Prevista</Badge>}

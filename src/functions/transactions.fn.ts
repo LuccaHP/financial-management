@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq, gte, ilike, lte, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, ilike, inArray, lte, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { db } from '#/db'
 import { accounts, categories, invoicePayments, transactions } from '#/db/schema'
@@ -171,6 +171,24 @@ export const deleteTransactionFn = createServerFn({ method: 'POST' })
     }
     // se for pagamento de fatura, o invoice_payments cai junto (CASCADE) e a fatura reabre
     await db.delete(transactions).where(eq(transactions.id, data.id))
+  })
+
+/** Marca/desmarca "já paguei" em uma ou várias transações (acompanhamento). */
+export const setTransactionsPaidFn = createServerFn({ method: 'POST' })
+  .inputValidator(
+    z.object({ ids: z.array(z.uuid()).min(1).max(200), paid: z.boolean() }),
+  )
+  .handler(async ({ data }) => {
+    const session = await ensureSession()
+    await db
+      .update(transactions)
+      .set({ paidAt: data.paid ? new Date() : null })
+      .where(
+        and(
+          eq(transactions.userId, session.id),
+          inArray(transactions.id, data.ids),
+        ),
+      )
   })
 
 /** Meses com transações (para o navegador de mês não ficar vazio). */
