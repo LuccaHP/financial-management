@@ -32,6 +32,25 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         rel: 'stylesheet',
         href: appCss,
       },
+      // BASE_URL respeita o APP_BASE_PATH (ex.: /deyno/ em produção)
+      {
+        rel: 'icon',
+        type: 'image/svg+xml',
+        href: `${import.meta.env.BASE_URL}favicon.svg`,
+      },
+      {
+        rel: 'icon',
+        sizes: '48x48 32x32 16x16',
+        href: `${import.meta.env.BASE_URL}favicon.ico`,
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: `${import.meta.env.BASE_URL}logo192.png`,
+      },
+      {
+        rel: 'manifest',
+        href: `${import.meta.env.BASE_URL}manifest.json`,
+      },
     ],
   }),
   loader: () => getThemeFn(),
