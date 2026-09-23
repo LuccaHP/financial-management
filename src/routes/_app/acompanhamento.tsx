@@ -224,11 +224,6 @@ function AcompanhamentoPage() {
         )}
       </div>
 
-      <p className="mb-4 border-2 border-line bg-surface-2 p-2 text-xs text-muted">
-        Marque o quadrado ao lado do item quando pagar. Itens "previstos" vêm
-        das recorrentes ativas e viram lançamentos quando o mês chega.
-      </p>
-
       {items.length === 0 ? (
         <Card>
           <div className="p-8 text-center">
