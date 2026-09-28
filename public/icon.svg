@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- leve profundidade no fundo amarelo (topo mais claro, base mais quente) -->
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffdb4d"/>
+      <stop offset="1" stop-color="#f4c318"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.32" cy="0.26" r="0.9">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#glow)"/>
+  <!-- porquinho (lucide piggy-bank), traço grosso, com margem generosa -->
+  <svg x="102" y="102" width="308" height="308" viewBox="0 0 24 24"
+       fill="none" stroke="#14120d" stroke-width="2.1"
+       stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a3.16 3.16 0 0 0 2-2h1a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-1a5 5 0 0 0-2-4V3a4 4 0 0 0-3.2 1.6l-.3.4H11a6 6 0 0 0-6 6v1a5 5 0 0 0 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1z"/>
+    <path d="M16 10h.01"/>
+    <path d="M2 8v1a2 2 0 0 0 2 2h1"/>
+  </svg>
+</svg>

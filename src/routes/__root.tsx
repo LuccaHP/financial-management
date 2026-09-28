@@ -26,6 +26,19 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         title: 'Deyno — Finanças Pessoais',
       },
+      {
+        name: 'theme-color',
+        content: '#ffd02e',
+      },
+      // rótulo curto sob o ícone quando adicionado à tela inicial (iOS)
+      {
+        name: 'apple-mobile-web-app-title',
+        content: 'Deyno',
+      },
+      {
+        name: 'apple-mobile-web-app-status-bar-style',
+        content: 'default',
+      },
     ],
     links: [
       {
@@ -46,11 +59,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         rel: 'apple-touch-icon',
         sizes: '180x180',
-        href: `${import.meta.env.BASE_URL}apple-touch-icon.png`,
+        href: `${import.meta.env.BASE_URL}apple-touch-icon.png?v=2`,
       },
       {
         rel: 'manifest',
-        href: `${import.meta.env.BASE_URL}manifest.json`,
+        href: `${import.meta.env.BASE_URL}manifest.json?v=2`,
       },
     ],
   }),
