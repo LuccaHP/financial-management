@@ -25,6 +25,7 @@ import { TransactionFormDialog } from '#/components/transaction-form-dialog'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card } from '#/components/ui/card'
+import { Dialog } from '#/components/ui/dialog'
 import {
   listMonthlyBillsFn,
   setRecurringOccurrencePaidFn,
@@ -70,6 +71,29 @@ export const Route = createFileRoute('/_app/acompanhamento')({
   component: AcompanhamentoPage,
 })
 
+/** Estado visível do item, derivado da data e do pago. */
+function billStatus(item: BillItem, today: string) {
+  if (item.paid) return 'paid' as const
+  if (item.date < today) return 'overdue' as const
+  if (item.date === today) return 'today' as const
+  if (item.kind === 'prevista') return 'projected' as const
+  if (item.kind === 'fatura') return 'invoice' as const
+  return 'upcoming' as const
+}
+
+function StatusBadge({ item, today }: { item: BillItem; today: string }) {
+  const status = billStatus(item, today)
+  if (status === 'paid')
+    return (
+      <Badge variant="income">{item.kind === 'fatura' ? 'Paga' : 'Pago'}</Badge>
+    )
+  if (status === 'overdue') return <Badge variant="expense">Vencido</Badge>
+  if (status === 'today') return <Badge variant="warn">Hoje</Badge>
+  if (status === 'projected') return <Badge variant="muted">Prevista</Badge>
+  if (status === 'invoice') return <Badge variant="accent">Fatura</Badge>
+  return null
+}
+
 function AcompanhamentoPage() {
   const search = Route.useSearch()
   const month = search.mes ?? currentMonthKey()
@@ -79,6 +103,7 @@ function AcompanhamentoPage() {
 
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<EditableTransaction | null>(null)
+  const [detail, setDetail] = useState<BillItem | null>(null)
 
   const today = todayKey()
   const unpaid = items.filter((item) => !item.paid)
@@ -119,6 +144,16 @@ function AcompanhamentoPage() {
     onError: (error) => alert(error.message),
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteTransactionFn({ data: { id } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bills'] })
+      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      queryClient.invalidateQueries({ queryKey: ['accounts'] })
+    },
+    onError: (error) => alert(error.message),
+  })
+
   const bulkMutation = useMutation({
     mutationFn: async () => {
       if (unpaidTxIds.length > 0) {
@@ -145,6 +180,7 @@ function AcompanhamentoPage() {
 
   function editItem(item: BillItem) {
     if (!item.txId || !item.accountId) return
+    setDetail(null)
     setEditing({
       id: item.txId,
       type: 'expense',
@@ -194,7 +230,7 @@ function AcompanhamentoPage() {
         }
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         <MonthNavigator
           month={month}
           onChange={(newMonth) =>
@@ -212,9 +248,7 @@ function AcompanhamentoPage() {
           </Badge>
         )}
         {upcomingCents > 0 && (
-          <Badge variant="warn">
-            A vencer {formatCentavos(upcomingCents)}
-          </Badge>
+          <Badge variant="warn">A vencer {formatCentavos(upcomingCents)}</Badge>
         )}
         {paidCents > 0 && (
           <Badge variant="income">
@@ -246,7 +280,7 @@ function AcompanhamentoPage() {
                 key={item.key}
                 item={item}
                 today={today}
-                onEdit={() => editItem(item)}
+                onOpen={() => setDetail(item)}
                 onTogglePaid={(paid) => paidMutation.mutate({ item, paid })}
                 togglePending={paidMutation.isPending}
               />
@@ -254,6 +288,24 @@ function AcompanhamentoPage() {
           </ul>
         </Card>
       )}
+
+      <BillDetailDialog
+        item={detail}
+        today={today}
+        onClose={() => setDetail(null)}
+        onEdit={() => detail && editItem(detail)}
+        onTogglePaid={(paid) =>
+          detail && paidMutation.mutate({ item: detail, paid })
+        }
+        onDelete={() => {
+          if (!detail?.txId) return
+          if (confirm(`Excluir "${detail.description}"?`)) {
+            deleteMutation.mutate(detail.txId)
+            setDetail(null)
+          }
+        }}
+        actionPending={paidMutation.isPending || deleteMutation.isPending}
+      />
 
       <TransactionFormDialog
         open={formOpen}
@@ -270,39 +322,23 @@ function AcompanhamentoPage() {
 function BillRow({
   item,
   today,
-  onEdit,
+  onOpen,
   onTogglePaid,
   togglePending,
 }: {
   item: BillItem
   today: string
-  onEdit: () => void
+  onOpen: () => void
   onTogglePaid: (paid: boolean) => void
   togglePending: boolean
 }) {
-  const queryClient = useQueryClient()
   const isOverdue = !item.paid && item.date < today
-  const isToday = !item.paid && item.date === today
-
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteTransactionFn({ data: { id: item.txId! } }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bills'] })
-      queryClient.invalidateQueries({ queryKey: ['transactions'] })
-      queryClient.invalidateQueries({ queryKey: ['accounts'] })
-    },
-    onError: (error) => alert(error.message),
-  })
 
   return (
-    <li className="group flex items-center gap-3 p-3 hover:bg-surface-2">
+    <li className="flex items-center gap-2.5 p-3 hover:bg-surface-2 sm:gap-3">
       {item.kind === 'fatura' ? (
         <span
-          title={
-            item.paid
-              ? 'Fatura paga'
-              : 'Pague a fatura na tela do cartão'
-          }
+          title={item.paid ? 'Fatura paga' : 'Pague a fatura na tela do cartão'}
           className={cn(
             'flex size-6 shrink-0 items-center justify-center border-2 border-line',
             item.paid ? 'bg-income text-[#14120d]' : 'bg-surface-2',
@@ -314,8 +350,9 @@ function BillRow({
         <button
           type="button"
           disabled={togglePending}
-          onClick={() => onTogglePaid(!item.paid)}
+          aria-pressed={item.paid}
           title={item.paid ? 'Desmarcar pagamento' : 'Marcar como pago'}
+          onClick={() => onTogglePaid(!item.paid)}
           className={cn(
             'flex size-6 shrink-0 cursor-pointer items-center justify-center border-2 border-line',
             item.paid
@@ -326,92 +363,184 @@ function BillRow({
           {item.paid && <Check className="size-4" strokeWidth={3.5} />}
         </button>
       )}
-      <div
-        className={cn(
-          'w-12 shrink-0 border-2 border-line py-1 text-center',
-          isOverdue ? 'bg-expense text-[#14120d]' : 'bg-surface-2',
-        )}
+
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left sm:gap-3"
       >
-        <span className="font-money text-lg font-bold">
-          {item.date.slice(8, 10)}
+        <span
+          className={cn(
+            'flex w-10 shrink-0 flex-col items-center border-2 border-line py-0.5 sm:w-11',
+            isOverdue ? 'bg-expense text-[#14120d]' : 'bg-surface-2',
+          )}
+        >
+          <span className="font-money text-lg leading-none font-bold">
+            {item.date.slice(8, 10)}
+          </span>
         </span>
-      </div>
-      <span
-        className="flex size-8 shrink-0 items-center justify-center border-2 border-line"
-        style={{ background: item.categoryColor ?? '#4d79ff' }}
-      >
-        <CategoryIcon
-          name={item.categoryIcon ?? 'tag'}
-          className="size-4 text-[#14120d]"
-        />
+
+        <span
+          className="flex size-8 shrink-0 items-center justify-center border-2 border-line"
+          style={{ background: item.categoryColor ?? '#4d79ff' }}
+        >
+          <CategoryIcon
+            name={item.categoryIcon ?? 'tag'}
+            className="size-4 text-[#14120d]"
+          />
+        </span>
+
+        <span className="min-w-0 flex-1">
+          <span className="block truncate font-bold">{item.description}</span>
+          <span className="block truncate text-xs text-muted">
+            {formatDateBR(item.date)}
+            {item.categoryName && ` · ${item.categoryName}`}
+          </span>
+        </span>
+
+        <span className="flex shrink-0 flex-col items-end gap-1">
+          <span className="font-money text-sm font-bold whitespace-nowrap">
+            {formatCentavos(item.amountCents)}
+          </span>
+          <StatusBadge item={item} today={today} />
+        </span>
+      </button>
+    </li>
+  )
+}
+
+function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-b-2 border-line py-2 last:border-b-0">
+      <span className="text-xs tracking-wider text-muted uppercase">
+        {label}
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-bold">{item.description}</p>
-        <p className="truncate text-xs text-muted">
-          {formatDateBR(item.date)}
-          {item.categoryName && ` · ${item.categoryName}`}
-          {` · ${item.sourceName}`}
-        </p>
-      </div>
-      <div className="flex shrink-0 items-center gap-2">
-        {item.paid && (
-          <Badge variant="income">
-            {item.kind === 'fatura' ? 'Paga' : 'Pago'}
-          </Badge>
-        )}
-        {isOverdue && <Badge variant="expense">Vencido</Badge>}
-        {isToday && <Badge variant="warn">Hoje</Badge>}
-        {item.kind === 'prevista' && <Badge variant="muted">Prevista</Badge>}
-        {item.kind === 'fatura' && !item.paid && (
-          <Badge variant="accent">Fatura</Badge>
-        )}
-        <span className="font-money text-sm font-bold">
-          {formatCentavos(item.amountCents)}
-        </span>
-        <div className="flex gap-1 md:opacity-0 md:transition-opacity md:group-hover:opacity-100 md:focus-within:opacity-100">
-          {item.kind === 'lancamento' && (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                title="Editar"
-                onClick={onEdit}
-              >
-                <Pencil className="size-4" strokeWidth={2.5} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                title="Excluir"
-                onClick={() => {
-                  if (confirm(`Excluir "${item.description}"?`))
-                    deleteMutation.mutate()
-                }}
-              >
-                <Trash2 className="size-4" strokeWidth={2.5} />
-              </Button>
-            </>
+      <span className="min-w-0 truncate text-right text-sm font-bold">
+        {children}
+      </span>
+    </div>
+  )
+}
+
+function BillDetailDialog({
+  item,
+  today,
+  onClose,
+  onEdit,
+  onTogglePaid,
+  onDelete,
+  actionPending,
+}: {
+  item: BillItem | null
+  today: string
+  onClose: () => void
+  onEdit: () => void
+  onTogglePaid: (paid: boolean) => void
+  onDelete: () => void
+  actionPending: boolean
+}) {
+  if (!item) return null
+  const kindLabel =
+    item.kind === 'prevista'
+      ? 'Recorrente prevista'
+      : item.kind === 'fatura'
+        ? 'Fatura de cartão'
+        : 'Lançamento'
+
+  return (
+    <Dialog open={item !== null} onClose={onClose} title={item.description}>
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <span
+            className="flex size-11 shrink-0 items-center justify-center border-2 border-line"
+            style={{ background: item.categoryColor ?? '#4d79ff' }}
+          >
+            <CategoryIcon
+              name={item.categoryIcon ?? 'tag'}
+              className="size-6 text-[#14120d]"
+            />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-money text-2xl font-bold">
+              {formatCentavos(item.amountCents)}
+            </p>
+            <div className="mt-0.5">
+              <StatusBadge item={item} today={today} />
+            </div>
+          </div>
+        </div>
+
+        <div className="border-2 border-line px-3">
+          <InfoRow label="Vencimento">{formatDateBR(item.date)}</InfoRow>
+          {item.categoryName && (
+            <InfoRow label="Categoria">{item.categoryName}</InfoRow>
           )}
-          {item.kind === 'prevista' && (
-            <Link to="/recorrentes" title="Editar recorrente">
-              <Button variant="ghost" size="icon">
-                <Repeat className="size-4" strokeWidth={2.5} />
-              </Button>
-            </Link>
-          )}
-          {item.kind === 'fatura' && item.cardId && (
+          <InfoRow label="Origem">{item.sourceName}</InfoRow>
+          <InfoRow label="Tipo">{kindLabel}</InfoRow>
+        </div>
+
+        {item.kind === 'prevista' && (
+          <p className="border-2 border-line bg-surface-2 p-2 text-xs text-muted">
+            Ainda não é um lançamento — marcar como pago já cria a despesa deste
+            mês. A recorrência também materializa sozinha quando o mês chega.
+          </p>
+        )}
+        {item.kind === 'fatura' && (
+          <p className="border-2 border-line bg-surface-2 p-2 text-xs text-muted">
+            Faturas são quitadas na tela do cartão (debitando uma conta).
+          </p>
+        )}
+
+        <div className="flex flex-wrap justify-end gap-2">
+          {item.kind === 'fatura' && item.cardId ? (
             <Link
               to="/cartoes/$cardId"
               params={{ cardId: item.cardId }}
-              title="Ver fatura"
+              onClick={onClose}
             >
-              <Button variant="ghost" size="icon">
+              <Button variant="secondary">
                 <CreditCard className="size-4" strokeWidth={2.5} />
+                Ir para o cartão
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              variant={item.paid ? 'secondary' : 'primary'}
+              disabled={actionPending}
+              onClick={() => onTogglePaid(!item.paid)}
+            >
+              <Check className="size-4" strokeWidth={2.5} />
+              {item.paid ? 'Desmarcar pagamento' : 'Marcar como pago'}
+            </Button>
+          )}
+
+          {item.kind === 'prevista' && (
+            <Link to="/recorrentes" onClick={onClose}>
+              <Button variant="secondary">
+                <Repeat className="size-4" strokeWidth={2.5} />
+                Editar recorrente
               </Button>
             </Link>
           )}
+
+          {item.kind === 'lancamento' && (
+            <>
+              <Button variant="secondary" onClick={onEdit}>
+                <Pencil className="size-4" strokeWidth={2.5} />
+                Editar
+              </Button>
+              <Button
+                variant="danger"
+                disabled={actionPending}
+                onClick={onDelete}
+              >
+                <Trash2 className="size-4" strokeWidth={2.5} />
+                Excluir
+              </Button>
+            </>
+          )}
         </div>
       </div>
-    </li>
+    </Dialog>
   )
 }
