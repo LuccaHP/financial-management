@@ -45,7 +45,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         rel: 'apple-touch-icon',
-        href: `${import.meta.env.BASE_URL}logo192.png`,
+        sizes: '180x180',
+        href: `${import.meta.env.BASE_URL}apple-touch-icon.png`,
       },
       {
         rel: 'manifest',
