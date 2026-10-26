@@ -5,7 +5,7 @@ import {
   useSuspenseQuery,
 } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { Plus, Target } from 'lucide-react'
+import { Plus, Target, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { PageHeader } from '#/components/page-header'
 import { Badge } from '#/components/ui/badge'
@@ -14,7 +14,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import { Dialog } from '#/components/ui/dialog'
 import { FieldError, Input, Label } from '#/components/ui/input'
 import { Progress } from '#/components/ui/progress'
-import { createGoalFn, listGoalsFn, updateGoalFn } from '#/functions/goals.fn'
+import {
+  createGoalFn,
+  deleteGoalFn,
+  listGoalsFn,
+  updateGoalFn,
+} from '#/functions/goals.fn'
 import { formatDateBR, formatMonthPt } from '#/lib/dates'
 import { formatCentavos, parseBRL } from '#/lib/money'
 import type { GoalRow } from '#/functions/goals.fn'
@@ -177,6 +182,15 @@ export function GoalFormDialog({
     onError: (mutationError) => setError(mutationError.message),
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteGoalFn({ data: { id: goal!.id } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['goals'] })
+      onClose()
+    },
+    onError: (mutationError) => setError(mutationError.message),
+  })
+
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(undefined)
@@ -250,7 +264,26 @@ export function GoalFormDialog({
           />
         </div>
         <FieldError message={error} />
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {goal && (
+            <Button
+              type="button"
+              variant="danger"
+              className="mr-auto"
+              disabled={deleteMutation.isPending}
+              onClick={() => {
+                if (
+                  confirm(
+                    `Excluir "${goal.name}"? Os aportes registrados somem junto.`,
+                  )
+                )
+                  deleteMutation.mutate()
+              }}
+            >
+              <Trash2 className="size-4" strokeWidth={2.5} />
+              {deleteMutation.isPending ? 'Excluindo…' : 'Excluir'}
+            </Button>
+          )}
           <Button variant="secondary" onClick={onClose}>
             Cancelar
           </Button>
