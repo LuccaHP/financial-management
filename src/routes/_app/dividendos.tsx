@@ -145,7 +145,7 @@ function DividendosPage() {
               + {formatCentavos(totalCents)} no mês
             </Badge>
             <Badge variant="muted">
-              {rows.length} pagamento{rows.length > 1 ? 's' : ''} ·{' '}
+              {rows.length} pagamento{rows.length > 1 ? 's' : ''} de{' '}
               {assetCount} ativo{assetCount > 1 ? 's' : ''}
             </Badge>
           </>
