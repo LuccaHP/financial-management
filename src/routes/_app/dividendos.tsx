@@ -14,6 +14,7 @@ import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card } from '#/components/ui/card'
 import { Dialog } from '#/components/ui/dialog'
+import { Select } from '#/components/ui/select'
 import {
   deleteDividendFn,
   importDividendsFn,
@@ -37,6 +38,7 @@ export const Route = createFileRoute('/_app/dividendos')({
       .string()
       .regex(/^\d{4}-\d{2}$/)
       .optional(),
+    ordem: z.enum(['valor-desc', 'valor-asc']).optional(),
   }),
   loaderDeps: ({ search }) => ({ mes: search.mes }),
   loader: ({ context, deps }) =>
@@ -70,6 +72,13 @@ function DividendosPage() {
 
   const totalCents = rows.reduce((sum, row) => sum + row.amountCents, 0)
   const assetCount = new Set(rows.map((row) => row.asset)).size
+
+  const ordem = search.ordem
+  const sorted = [...rows].sort((a, b) => {
+    if (ordem === 'valor-desc') return b.amountCents - a.amountCents
+    if (ordem === 'valor-asc') return a.amountCents - b.amountCents
+    return a.date.localeCompare(b.date) || a.asset.localeCompare(b.asset)
+  })
 
   const parseMutation = useMutation({
     mutationFn: async (file: File) =>
@@ -136,9 +145,30 @@ function DividendosPage() {
         <MonthNavigator
           month={month}
           onChange={(newMonth) =>
-            navigate({ search: { mes: newMonth }, replace: true })
+            navigate({
+              search: (prev) => ({ ...prev, mes: newMonth }),
+              replace: true,
+            })
           }
         />
+        <Select
+          value={ordem ?? ''}
+          onChange={(e) =>
+            navigate({
+              search: (prev) => ({
+                ...prev,
+                ordem: (e.target.value || undefined) as typeof ordem,
+              }),
+              replace: true,
+            })
+          }
+          className="w-auto"
+          aria-label="Ordenar"
+        >
+          <option value="">Por data</option>
+          <option value="valor-desc">Maior valor</option>
+          <option value="valor-asc">Menor valor</option>
+        </Select>
         {rows.length > 0 && (
           <>
             <Badge variant="income">
@@ -171,7 +201,7 @@ function DividendosPage() {
       ) : (
         <Card>
           <ul className="divide-y-2 divide-line">
-            {rows.map((row) => (
+            {sorted.map((row) => (
               <DividendLine key={row.id} row={row} />
             ))}
           </ul>
