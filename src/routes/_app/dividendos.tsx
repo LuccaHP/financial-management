@@ -5,7 +5,14 @@ import {
   useSuspenseQuery,
 } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { HandCoins, Trash2, Upload } from 'lucide-react'
+import {
+  ArrowDownWideNarrow,
+  ArrowUpDown,
+  ArrowUpNarrowWide,
+  HandCoins,
+  Trash2,
+  Upload,
+} from 'lucide-react'
 import { useRef, useState } from 'react'
 import { z } from 'zod'
 import { MonthNavigator } from '#/components/month-navigator'
@@ -14,7 +21,7 @@ import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
 import { Card } from '#/components/ui/card'
 import { Dialog } from '#/components/ui/dialog'
-import { Select } from '#/components/ui/select'
+import { cn } from '#/lib/cn'
 import {
   deleteDividendFn,
   importDividendsFn,
@@ -151,24 +158,6 @@ function DividendosPage() {
             })
           }
         />
-        <Select
-          value={ordem ?? ''}
-          onChange={(e) =>
-            navigate({
-              search: (prev) => ({
-                ...prev,
-                ordem: (e.target.value || undefined) as typeof ordem,
-              }),
-              replace: true,
-            })
-          }
-          className="w-auto"
-          aria-label="Ordenar"
-        >
-          <option value="">Por data</option>
-          <option value="valor-desc">Maior valor</option>
-          <option value="valor-asc">Menor valor</option>
-        </Select>
         {rows.length > 0 && (
           <>
             <Badge variant="income">
@@ -180,6 +169,45 @@ function DividendosPage() {
             </Badge>
           </>
         )}
+        <button
+          type="button"
+          onClick={() =>
+            navigate({
+              search: (prev) => ({
+                ...prev,
+                ordem:
+                  ordem === 'valor-desc'
+                    ? ('valor-asc' as const)
+                    : ordem === 'valor-asc'
+                      ? undefined
+                      : ('valor-desc' as const),
+              }),
+              replace: true,
+            })
+          }
+          title={
+            ordem === 'valor-desc'
+              ? 'Ordenado por maior valor — clique para menor valor'
+              : ordem === 'valor-asc'
+                ? 'Ordenado por menor valor — clique para ordenar por data'
+                : 'Ordenado por data — clique para ordenar por maior valor'
+          }
+          aria-label="Alternar ordenação"
+          className={cn(
+            'ml-auto cursor-pointer border-2 border-line p-2 shadow-brutal-sm',
+            ordem
+              ? 'bg-primary text-primary-ink'
+              : 'bg-surface hover:bg-surface-2',
+          )}
+        >
+          {ordem === 'valor-desc' ? (
+            <ArrowDownWideNarrow className="size-4" strokeWidth={2.5} />
+          ) : ordem === 'valor-asc' ? (
+            <ArrowUpNarrowWide className="size-4" strokeWidth={2.5} />
+          ) : (
+            <ArrowUpDown className="size-4" strokeWidth={2.5} />
+          )}
+        </button>
       </div>
 
       {rows.length === 0 ? (
