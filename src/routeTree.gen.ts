@@ -15,6 +15,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppRecorrentesRouteImport } from './routes/_app/recorrentes'
 import { Route as AppOrcamentosRouteImport } from './routes/_app/orcamentos'
+import { Route as AppDividendosRouteImport } from './routes/_app/dividendos'
 import { Route as AppContasRouteImport } from './routes/_app/contas'
 import { Route as AppConfiguracoesRouteImport } from './routes/_app/configuracoes'
 import { Route as AppCategoriasRouteImport } from './routes/_app/categorias'
@@ -55,6 +56,11 @@ const AppRecorrentesRoute = AppRecorrentesRouteImport.update({
 const AppOrcamentosRoute = AppOrcamentosRouteImport.update({
   id: '/orcamentos',
   path: '/orcamentos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDividendosRoute = AppDividendosRouteImport.update({
+  id: '/dividendos',
+  path: '/dividendos',
   getParentRoute: () => AppRoute,
 } as any)
 const AppContasRoute = AppContasRouteImport.update({
@@ -126,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/categorias': typeof AppCategoriasRoute
   '/configuracoes': typeof AppConfiguracoesRoute
   '/contas': typeof AppContasRoute
+  '/dividendos': typeof AppDividendosRoute
   '/orcamentos': typeof AppOrcamentosRoute
   '/recorrentes': typeof AppRecorrentesRoute
   '/admin/usuarios': typeof AppAdminUsuariosRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/categorias': typeof AppCategoriasRoute
   '/configuracoes': typeof AppConfiguracoesRoute
   '/contas': typeof AppContasRoute
+  '/dividendos': typeof AppDividendosRoute
   '/orcamentos': typeof AppOrcamentosRoute
   '/recorrentes': typeof AppRecorrentesRoute
   '/': typeof AppIndexRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   '/_app/categorias': typeof AppCategoriasRoute
   '/_app/configuracoes': typeof AppConfiguracoesRoute
   '/_app/contas': typeof AppContasRoute
+  '/_app/dividendos': typeof AppDividendosRoute
   '/_app/orcamentos': typeof AppOrcamentosRoute
   '/_app/recorrentes': typeof AppRecorrentesRoute
   '/_app/': typeof AppIndexRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/configuracoes'
     | '/contas'
+    | '/dividendos'
     | '/orcamentos'
     | '/recorrentes'
     | '/admin/usuarios'
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/configuracoes'
     | '/contas'
+    | '/dividendos'
     | '/orcamentos'
     | '/recorrentes'
     | '/'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/_app/categorias'
     | '/_app/configuracoes'
     | '/_app/contas'
+    | '/_app/dividendos'
     | '/_app/orcamentos'
     | '/_app/recorrentes'
     | '/_app/'
@@ -287,6 +299,13 @@ declare module '@tanstack/react-router' {
       path: '/orcamentos'
       fullPath: '/orcamentos'
       preLoaderRoute: typeof AppOrcamentosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dividendos': {
+      id: '/_app/dividendos'
+      path: '/dividendos'
+      fullPath: '/dividendos'
+      preLoaderRoute: typeof AppDividendosRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/contas': {
@@ -381,6 +400,7 @@ interface AppRouteChildren {
   AppCategoriasRoute: typeof AppCategoriasRoute
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppContasRoute: typeof AppContasRoute
+  AppDividendosRoute: typeof AppDividendosRoute
   AppOrcamentosRoute: typeof AppOrcamentosRoute
   AppRecorrentesRoute: typeof AppRecorrentesRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -398,6 +418,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCategoriasRoute: AppCategoriasRoute,
   AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppContasRoute: AppContasRoute,
+  AppDividendosRoute: AppDividendosRoute,
   AppOrcamentosRoute: AppOrcamentosRoute,
   AppRecorrentesRoute: AppRecorrentesRoute,
   AppIndexRoute: AppIndexRoute,
@@ -421,12 +442,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

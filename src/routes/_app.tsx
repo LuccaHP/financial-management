@@ -10,6 +10,7 @@ import {
   ArrowLeftRight,
   CalendarClock,
   CreditCard,
+  HandCoins,
   LayoutDashboard,
   LogOut,
   PiggyBank,
@@ -48,6 +49,7 @@ const NAV: Array<{ to: string; label: string; icon: LucideIcon }> = [
   { to: '/recorrentes', label: 'Recorrentes', icon: Repeat },
   { to: '/orcamentos', label: 'Orçamentos', icon: Gauge },
   { to: '/objetivos', label: 'Objetivos', icon: Target },
+  { to: '/dividendos', label: 'Dividendos', icon: HandCoins },
   { to: '/categorias', label: 'Categorias', icon: Shapes },
 ]
 

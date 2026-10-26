@@ -15,6 +15,13 @@
       "when": 1790183104079,
       "tag": "0001_giant_microchip",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793037538987,
+      "tag": "0002_last_oracle",
+      "breakpoints": true
     }
   ]
 }
