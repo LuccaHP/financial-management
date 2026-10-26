@@ -62,7 +62,7 @@ function AppLayout() {
   return (
     <div className="flex min-h-dvh flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="flex shrink-0 flex-col border-b-4 border-line bg-surface md:min-h-dvh md:w-56 md:border-r-4 md:border-b-0">
+      <aside className="flex shrink-0 flex-col border-b-4 border-line bg-surface md:sticky md:top-0 md:max-h-dvh md:min-h-dvh md:w-56 md:border-r-4 md:border-b-0">
         <Link
           to="/"
           className="flex items-center gap-2 border-b-4 border-line bg-primary px-4 py-3"
@@ -73,7 +73,7 @@ function AppLayout() {
           </span>
         </Link>
 
-        <nav className="flex flex-row gap-1 overflow-x-auto p-2 md:flex-1 md:flex-col md:overflow-visible">
+        <nav className="flex flex-row gap-1 overflow-x-auto p-2 md:min-h-0 md:flex-1 md:flex-col md:overflow-y-auto md:overflow-x-visible">
           {NAV.map((item) => (
             <NavLink key={item.to} {...item} />
           ))}
